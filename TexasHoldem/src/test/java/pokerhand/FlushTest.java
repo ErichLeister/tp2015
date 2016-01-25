@@ -3,45 +3,27 @@ package pokerhand;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+import org.mockito.Mockito;
+
+import exceptions.WrongColorException;
+import exceptions.WrongNameException;
+import model.Card;
+import model.Player;
 
 public class FlushTest {
 
-//	@Test
-//	public void testGetRank() {
-//		List<Card> cards = new ArrayList<Card>();
-//		
-//		Flush ph = new Flush(new Player("player"), );
-//		assertEquals(6)
-//	}
-
 	@Test
-	public void testSubCompare() {
-		fail("Not yet implemented");
-	}
+	public void testSubCompare() throws WrongColorException, WrongNameException {		
+		Card t1 = new Card("D", "pik");
+		Card t2 = new Card("5", "kier");
+		
+		Player p1 = Mockito.mock(Player.class);
+		Player p2 = Mockito.mock(Player.class);
 
-	@Test
-	public void testFlush() {
-		fail("Not yet implemented");
-	}
+		ThreeOfAKing op1 = new ThreeOfAKing(p1, t1);
+		ThreeOfAKing op2 = new ThreeOfAKing(p2, t2);
 
-	@Test
-	public void testGetCards() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testPokerHand() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testGetPlayer() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	public void testCompareCardLists() {
-		fail("Not yet implemented");
+		assertEquals(op1.subCompare(op1, op2), 1);
 	}
 
 }
