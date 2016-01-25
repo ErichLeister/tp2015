@@ -25,4 +25,10 @@ public class Card {
 	public String getColor() {
 		return color;
 	}
+	public String toString() {
+		return name + " "  + color;
+	}
+	public boolean equals(Card c) {
+		return (this.getName().equals(c.getName()) && (this.getColor().equals(c.getColor())));
+	}
 }
