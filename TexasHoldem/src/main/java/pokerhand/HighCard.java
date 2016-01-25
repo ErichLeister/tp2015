@@ -35,7 +35,7 @@ public class HighCard extends PokerHand{
 		ArrayList<Card> l2 = (ArrayList<Card>)((HighCard)o2).getCards();
 		int outcome = 0;
 		try {
-			outcome=this.compareCardLists(l1, l2, new CardComparator());
+			outcome=new CardComparator().compareCardLists(l1, l2, new CardComparator());
 		}
 		catch(NotSameListsLengthException e) {
 			System.err.println(e.getMessage());
