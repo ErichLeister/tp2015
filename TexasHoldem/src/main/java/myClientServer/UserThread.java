@@ -6,31 +6,29 @@ import java.net.Socket;
 public class UserThread extends Thread{
 	private ObjectInputStream in;
 	private Socket socket;
-	private Answear answear;
+	private Answer answer;
 	private RealUser user;
 	
-	UserThread(ObjectInputStream in, RealUser user){
+	UserThread(ObjectInputStream in, RealUser user, Socket socket){
 		this.user = user;
 		this.in = in;
-
+		this.socket = socket;
 	}
-	private void readMessage(){
-
-	}
-
-	public Answear getAnswear(){
-		synchronized(this){
-			return answear;
-		}
-	}
+	
 	public void run(){
 		try{
 			try {
 				while (true) {
 					synchronized(this){
-					Answear a = (Answear) in.readObject();
-					answear = a;
-					notifyAll();
+						System.out.println("reading");
+					Answer a = (Answer) in.readObject();
+					System.out.println(a.getMessage());
+					answer = a;
+					user.setAnswer(answer);
+
+					}
+					synchronized(user){
+						user.notifyAll();
 					}
 				}
 			} 
@@ -43,7 +41,10 @@ public class UserThread extends Thread{
             System.out.println("Error handling client");
         } finally {
             try {
-                socket.close();
+            	//if(socket != null)
+            	//{
+            		socket.close();
+            	//}
             } catch (IOException e) {
             	System.out.println("Couldn't close a socket, what's going on?");
             }

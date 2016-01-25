@@ -1,5 +1,7 @@
 package myClientServer;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -22,11 +24,25 @@ public class Client {
     public Client(){
         frame = new JFrame("Capitalize Client");
         dataField = new JTextField(40);
+        dataField.addActionListener(new ActionListener() 
+        {
+    	    public void actionPerformed(ActionEvent e) 
+    	    {
+    	        //out.println(dataField.getText());
+    	        try {
+    				out.writeObject(new Answer("klient"));
+    			} catch (IOException e1) {
+    				// TODO Auto-generated catch block
+    				e1.printStackTrace();
+    			}
+    	    }
+        });
         messageArea = new JTextArea(8, 60);
         messageArea.setEditable(false);
         frame.getContentPane().add(dataField, "North");
         frame.getContentPane().add(new JScrollPane(messageArea), "Center");
     }
+
     
     public static void main(String[] args) throws Exception{
     	Client client = new Client();
@@ -51,22 +67,18 @@ public class Client {
 
         // Consume the initial welcoming messages from the server
         Message message;
-		try {
-			message = (Message)in.readObject();
-	        messageArea.append(message.getMessage() + "\n");
-		} catch (ClassNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-        messageArea.append("test \n");
-		try {
-			message = (Message)in.readObject();
-	        messageArea.append(message.getMessage() + "\n");
-		} catch (ClassNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-        messageArea.append("test2 \n");
+        int mesC = 0;
+        while(mesC >= 0 )
+        {
+        	mesC ++;
+			try {
+				message = (Message)in.readObject();
+		        messageArea.append(message.getMessage() + "\n");
+			} catch (ClassNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+        }
 		socket.close();
     }
 }

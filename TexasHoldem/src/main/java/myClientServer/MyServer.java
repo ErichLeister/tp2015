@@ -9,17 +9,17 @@ import java.util.List;
 public class MyServer {
 
 	private List<RealUser> users;
-	private ServerThread serverThread;
 	private WaitingForGameStart waiting;
 	
 	public MyServer(){
 		users = new ArrayList<RealUser>();
-		serverThread = new ServerThread(this);
+		ServerThread serverThread = new ServerThread(this);
 		waiting = new WaitingForGameStart();
+		serverThread.start();
 	}
 	private boolean shouldGameStart(){
 		boolean should = false;
-		if(users.size()>=4)
+		if(users.size()>=2)
 			should = true;
 		return should;
 	}
@@ -30,13 +30,23 @@ public class MyServer {
 	}
     public static void main(String[] args){
     	MyServer server = new MyServer();
-		server.serverThread.start();
 		server.waiting.waitForGameStart();
-		server.giveMessageToAllUsers(new Message("PoczatekGry"));
+    	/*try {
+    		synchronized(server){
+			server.wait(10000);
+    		}
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+		Game game = new Game(server.users);
+		game.startGame();
+		//server.giveMessageToAllUsers(new Message("PoczatekGry"));
     }
-    public void addUser(ObjectInputStream in, ObjectOutputStream out){
+    public void addUser(Socket socket){
     	//System.out.println("testU");
-    	users.add(new RealUser(in, out, this));
+    	users.add(new RealUser(socket,this));
+    	tryStartGame();
     }
     
     public void tryStartGame(){

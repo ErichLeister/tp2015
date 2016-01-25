@@ -6,34 +6,49 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class RealUser {
+	private String nick;
 	private UserThread userThread;
-	private MyServer myServer;
+	private MyServer server;
 	private ObjectOutputStream out;
-	RealUser(ObjectInputStream in, ObjectOutputStream out, MyServer myServer){
-		
-		this.out = out;
-		this.userThread = new UserThread(in, this);
-		this.myServer = myServer;
-    	userThread.start();
-    	System.out.println("test");
-		giveMessage(new Message());
+	private Answer answer;
+	RealUser(Socket socket, MyServer server){
+		nick = "no name";
+		this.server = server;
+    	
+		try {
+			out = new ObjectOutputStream(socket.getOutputStream());
+			this.out = out;
+	        ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+			this.userThread = new UserThread(in, this, socket);
+	    	userThread.start();
+			giveMessage(new Message());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 
 	}
-	private Answear checkAnswear(Answear answear){
+	private Answer checkAnswear(Answer answear){
 		return answear;
 	}
-	public Answear getAnswear(){
+	public Answer getAnswer(){
+		setAnswer(new Answer());
 		try {
-			userThread.wait();
+			synchronized(this){
+				wait();
+				return answer;
+			}
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		Answear answear =  userThread.getAnswear();
-		return answear;
-	}
-	public void receiveAnswear(Answear answear){
+		return answer;
+		//Answer answer =  userThread.getAnswear();
 		
+	}
+	public synchronized void setAnswer(Answer answer){
+		this.answer = answer;
 	}
 	public void giveMessage(Message message){
 		try {
