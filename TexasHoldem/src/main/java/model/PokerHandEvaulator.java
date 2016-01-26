@@ -15,6 +15,7 @@ import pokerhand.FullHouse;
 import pokerhand.PokerHand;
 import pokerhand.StraightFlush;
 import pokerhand.ThreeOfAKing;
+import pokerhand.TwoPairs;
 
 
 public class PokerHandEvaulator {
@@ -229,8 +230,42 @@ public class PokerHandEvaulator {
 				isFound = true;
 			}
 		}
-		
 		return (isFound ? new ThreeOfAKing(p, outputCard) : null);		
+	}
+	
+	public PokerHand findTwoPairs(Player p, Map<Card, List<Card>> cards) {
+		CardComparator cc = new CardComparator();
+		TreeSet<Card> ts = new TreeSet<Card>(cc);
+		ts.addAll(cards.keySet());
+		
+		Iterator<Card> it = ts.descendingIterator();
+		boolean isHigherPairFound = false;
+		boolean isLowerPairFound = false;
+		boolean isKickerFound = false;
+		
+		Card card;
+		Card HPair = null;
+		Card LPair = null;
+		Card Kicker = null;
+		
+		while(it.hasNext() && !(isHigherPairFound && isLowerPairFound && isKickerFound)) {
+			card = it.next();
+			if(!isHigherPairFound && cards.get(card).size() == 2) {
+				HPair = card;
+				isHigherPairFound = true;
+				continue;
+			}
+			if(!isLowerPairFound && cards.get(card).size() == 2) {
+				LPair = card;
+				isLowerPairFound = true;
+				continue;
+			}
+			if(!isKickerFound) {
+				Kicker = card;
+				isKickerFound = true;
+			}
+		}
+		return (isHigherPairFound && isLowerPairFound && isKickerFound? new TwoPairs(p, HPair, LPair, Kicker) : null);
 	}
 		
 }
