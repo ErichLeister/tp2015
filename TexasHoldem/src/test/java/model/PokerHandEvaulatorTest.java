@@ -17,6 +17,7 @@ import exceptions.WrongNameException;
 import pokerhand.Flush;
 import pokerhand.FourOfAKing;
 import pokerhand.FullHouse;
+import pokerhand.OnePair;
 import pokerhand.ThreeOfAKing;
 import pokerhand.TwoPairs;
 
@@ -304,9 +305,60 @@ public class PokerHandEvaulatorTest {
 		arg.put(c7, l5);
 		
 		TwoPairs output = (TwoPairs) phe.findTwoPairs(p, arg);
+		
 		if(output == null || !output.getFirstPair().getName().equals("K") ||
 				!output.getSecondPair().getName().equals("8") || !output.getKicker().getName().equals("5"))
 			fail();
 		
+	}
+
+	@Test
+	public void testFindOnePair() throws WrongColorException, WrongNameException {
+		List<Card> l1, l2, l3, l4, l5, l6;
+		Card c1, c2, c3, c4, c5, c6, c7;
+		Player p = Mockito.mock(Player.class);
+		PokerHandEvaulator phe = new PokerHandEvaulator();
+		
+		l1 = new ArrayList<Card>();
+		l2 = new ArrayList<Card>();
+		l3 = new ArrayList<Card>();
+		l4 = new ArrayList<Card>();
+		l5 = new ArrayList<Card>();
+		l6 = new ArrayList<Card>();
+		
+		c1 = new Card("5", "pik");
+		c2 = new Card("8", "kier");
+		c3 = new Card("K", "kier");
+		c4 = new Card("8", "karo");
+		c5 = new Card("D", "pik");
+		c6 = new Card("2", "pik");
+		c7 = new Card("4", "trefl");
+		
+		l1.add(c1);
+		l2.add(c2);
+		l2.add(c4);
+		l3.add(c3);
+		l6.add(c5);
+		l4.add(c6);
+		l5.add(c7);
+		
+		Map<Card,List<Card>> arg = new TreeMap<Card,List<Card>>(new CardComparator());
+		arg.put(c1, l1);
+		arg.put(c2, l2);
+		arg.put(c3, l3);
+		arg.put(c6, l4);
+		arg.put(c7, l5);
+		arg.put(c5, l6);
+		
+		OnePair output = (OnePair) phe.findOnePair(p, arg);
+		
+		if(output == null || !output.getPair().getName().equals("8"))	
+			fail();
+		ArrayList<Card> rest = (ArrayList<Card>) output.getRest();
+		Collections.sort(rest, new CardComparator());
+
+		if(!rest.get(0).getName().equals("5") || !rest.get(1).getName().equals("D") || !rest.get(2).getName().equals("K"))
+			fail();
+			
 	}
 }

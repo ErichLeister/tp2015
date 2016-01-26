@@ -12,6 +12,7 @@ import exceptions.PokerHandException;
 import pokerhand.Flush;
 import pokerhand.FourOfAKing;
 import pokerhand.FullHouse;
+import pokerhand.OnePair;
 import pokerhand.PokerHand;
 import pokerhand.StraightFlush;
 import pokerhand.ThreeOfAKing;
@@ -268,4 +269,43 @@ public class PokerHandEvaulator {
 		return (isHigherPairFound && isLowerPairFound && isKickerFound? new TwoPairs(p, HPair, LPair, Kicker) : null);
 	}
 		
+	public PokerHand findOnePair(Player p, Map<Card, List<Card>> cards) {
+		CardComparator cc = new CardComparator();
+		TreeSet<Card> ts = new TreeSet<Card>(cc);
+		ts.addAll(cards.keySet());
+		
+		Iterator<Card> it = ts.descendingIterator();
+		boolean isPairFound = false;
+		boolean isRestReady = false;
+		List<Card> rest = new ArrayList<Card>();
+		
+		Card card;
+		Card pair = null;
+		
+		while(it.hasNext() && !(isPairFound && isRestReady)) {
+			card = it.next();
+			if(!isPairFound && cards.get(card).size() == 2) {
+				pair = card;
+				isPairFound = true;
+			}
+			else {
+				rest.add(card);
+				if(rest.size() == 3)
+					isRestReady = true;
+			}
+			
+		}
+			
+		if(isPairFound && isRestReady) {
+			PokerHand outcome = null;
+			try {
+				outcome = new OnePair(p, pair, rest);
+			}
+			catch(PokerHandException e) {}
+			return outcome;
+		}
+		else 
+			return null;
+		
+	}		
 }
