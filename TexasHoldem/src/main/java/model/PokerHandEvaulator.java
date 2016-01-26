@@ -9,6 +9,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import pokerhand.FourOfAKing;
+import pokerhand.FullHouse;
 import pokerhand.PokerHand;
 import pokerhand.StraightFlush;
 
@@ -114,4 +115,28 @@ public class PokerHandEvaulator {
 		
 	}
 	
+	public PokerHand findFullHouse(Player p, Map<Card, List<Card>> cards) {
+		CardComparator cc = new CardComparator();
+		TreeSet<Card> ts = new TreeSet<Card>(cc);
+		ts.addAll(cards.keySet());
+		
+		Iterator<Card> it = ts.descendingIterator();
+		boolean isThreeFound = false;
+		boolean isPairFound = false;
+		
+		Card card;
+		Card outputThree = null;
+		
+		while(it.hasNext() && !(isThreeFound && isPairFound)) {
+			card = it.next();
+			if(!isThreeFound && cards.get(card).size() == 3) {
+				outputThree = card;
+				isThreeFound = true;
+			}
+			if(!isPairFound && cards.get(card).size() == 2) {
+				isPairFound = true;
+			}
+		}
+		return (isThreeFound && isPairFound ? new FullHouse(p, outputThree) : null);
+	}
 }
