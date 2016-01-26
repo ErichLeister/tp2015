@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import pokerhand.FourOfAKing;
 import pokerhand.PokerHand;
 import pokerhand.StraightFlush;
 
@@ -18,13 +19,6 @@ public class PokerHandEvaulator {
 	public PokerHandEvaulator() {
 		this.pokerHand = null;
 	}
-	
-//	class PackedCards {
-//		Map<String, List<Card>> packedCards;
-//		PackedCards(List<Card> cards) {
-//			this.packedCards = groupCards.
-//		}
-//	}
 	
 	public Map<Card, List<Card>> groupCards(List<Card> cards) {
 		CardComparator cc = new CardComparator();
@@ -55,16 +49,13 @@ public class PokerHandEvaulator {
 		return output;
 	}
 	
-	PokerHand findStraightflush(Player p, Map<Card, List<Card>> cards) {
+	public PokerHand findStraightflush(Player p, Map<Card, List<Card>> cards) {
 		CardComparator cc = new CardComparator();
-		//Collections.sort((ArrayList)cards, cc);
 		TreeSet<Card> ts = new TreeSet<Card>(cc);
 		ts.addAll(cards.keySet());
 		
-		Iterator<Card> it =ts.descendingIterator(); //((TreeSet<Card>)cards.keySet()).descendingIterator();
+		Iterator<Card> it = ts.descendingIterator();
 		Iterator<Card> itColor;
-//		List<String> keys = new ArrayList<String>();
-//		keys.addAll(cards.keySet());
 		boolean isFound = false;
 		boolean isFoundColor = false;
 		Card card = null;
@@ -99,6 +90,28 @@ public class PokerHandEvaulator {
 			last = card;
 		}
 		return (isFound ? new StraightFlush(p, max) : null);
+	}
+	
+	public PokerHand findFourOfAKing(Player p, Map<Card, List<Card>> cards) {
+		CardComparator cc = new CardComparator();
+		TreeSet<Card> ts = new TreeSet<Card>(cc);
+		ts.addAll(cards.keySet());
+		
+		Iterator<Card> it = ts.descendingIterator();
+		boolean isFound = false;
+		Card card;
+		Card outputCard = null;
+		
+		while(it.hasNext() && !isFound) {
+			card = it.next();
+			if(cards.get(card).size() == 4) {
+				outputCard = card;
+				isFound = true;
+			}
+		}
+		
+		return (isFound ? new FourOfAKing(p, outputCard) : null);
+		
 	}
 	
 }
