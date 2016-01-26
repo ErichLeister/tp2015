@@ -14,6 +14,7 @@ import pokerhand.FourOfAKing;
 import pokerhand.FullHouse;
 import pokerhand.PokerHand;
 import pokerhand.StraightFlush;
+import pokerhand.ThreeOfAKing;
 
 
 public class PokerHandEvaulator {
@@ -210,4 +211,26 @@ public class PokerHandEvaulator {
 		else
 			return null;
 	}
+
+	public PokerHand findThreeOfAKing(Player p, Map<Card, List<Card>> cards) {
+		CardComparator cc = new CardComparator();
+		TreeSet<Card> ts = new TreeSet<Card>(cc);
+		ts.addAll(cards.keySet());
+		
+		Iterator<Card> it = ts.descendingIterator();
+		boolean isFound = false;
+		Card card;
+		Card outputCard = null;
+		
+		while(it.hasNext() && !isFound) {
+			card = it.next();
+			if(cards.get(card).size() == 3) {
+				outputCard = card;
+				isFound = true;
+			}
+		}
+		
+		return (isFound ? new ThreeOfAKing(p, outputCard) : null);		
+	}
+		
 }
