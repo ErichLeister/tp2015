@@ -12,11 +12,7 @@ public class CardComparator implements Comparator<Card> {
 	private int findNamesIndexInArray(String name) throws WrongNameException {
 		int i=0;
 		boolean isFound = false;
-//		while(Card.availableNames[i] != name) {
-//			i++;
-//			isFound = true;
-//		}
-//		i--;
+		
 		for(i=0 ; i<Card.availableNames.length ; i++) {
 			if(name.equals(Card.availableNames[i])) {
 				isFound = true;
@@ -50,8 +46,14 @@ public class CardComparator implements Comparator<Card> {
 	}
 	
 	//is a successor of b
-	public boolean isSuccessor(Card a, Card b) throws WrongNameException {
-		return ((this.findNamesIndexInArray(a.getName()) - this.findNamesIndexInArray(b.getName())) == 1);
+	public boolean isSuccessor(Card a, Card b) {
+		boolean outcome = false;
+		try {
+			outcome = ((this.findNamesIndexInArray(a.getName()) - this.findNamesIndexInArray(b.getName())) == 1);
+		} catch (WrongNameException e) {
+			e.printStackTrace();
+		}
+		return outcome;
 	}
 	
 	public int compareCardLists(List<Card> l1, List<Card> l2, Comparator<Card> cc) 
@@ -66,7 +68,7 @@ public class CardComparator implements Comparator<Card> {
 		int i=l1.size()-1;
 		
 		do {
-			outcome =cc.compare(l1.get(i), l2.get(i));
+			outcome = cc.compare(l1.get(i), l2.get(i));
 			i--;
 		}
 		while((outcome == 0) && (i > 0));
