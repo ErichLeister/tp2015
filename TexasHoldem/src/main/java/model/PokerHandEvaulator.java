@@ -12,6 +12,7 @@ import exceptions.PokerHandException;
 import pokerhand.Flush;
 import pokerhand.FourOfAKing;
 import pokerhand.FullHouse;
+import pokerhand.HighCard;
 import pokerhand.OnePair;
 import pokerhand.PokerHand;
 import pokerhand.StraightFlush;
@@ -307,5 +308,56 @@ public class PokerHandEvaulator {
 		else 
 			return null;
 		
-	}		
+	}
+	
+	public PokerHand findHighCard(Player p, Map<Card, List<Card>> cards) {
+		CardComparator cc = new CardComparator();
+		TreeSet<Card> ts = new TreeSet<Card>(cc);
+		ts.addAll(cards.keySet());
+		
+		Card card;
+		Iterator<Card> it = ts.descendingIterator();
+		List<Card> output = new ArrayList<Card>();
+		
+		while(it.hasNext() && output.size()<5) {
+			card = it.next();
+			output.add(card);
+		}
+			
+		HighCard hc = null;
+		try {
+			hc = new HighCard(p, output);
+		} catch (PokerHandException e) {
+		}
+		return hc;
+	}
+
+	public PokerHand returnBestPokerHand(Player p, List<Card> cards) {
+		PokerHand outcome;
+		Map<Card, List<Card>> groupedCards = groupCards(cards);
+		outcome = findStraightflush(p, groupedCards);
+		if(outcome != null)
+			return outcome;
+		outcome = findFourOfAKing(p, groupedCards);
+		if(outcome != null)
+			return outcome;
+		outcome = findFullHouse(p, groupedCards);
+		if(outcome != null)
+			return outcome;
+		outcome = findFlush(p, groupedCards);
+		if(outcome != null)
+			return outcome;
+		outcome = findThreeOfAKing(p, groupedCards);
+		if(outcome != null)
+			return outcome;
+		outcome = findTwoPairs(p, groupedCards);
+		if(outcome != null)
+			return outcome;
+		outcome = findOnePair(p, groupedCards);
+		if(outcome != null)
+			return outcome;
+		outcome = findHighCard(p, groupedCards);
+		return outcome;
+		
+	}
 }

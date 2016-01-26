@@ -17,7 +17,9 @@ import exceptions.WrongNameException;
 import pokerhand.Flush;
 import pokerhand.FourOfAKing;
 import pokerhand.FullHouse;
+import pokerhand.HighCard;
 import pokerhand.OnePair;
+import pokerhand.PokerHand;
 import pokerhand.ThreeOfAKing;
 import pokerhand.TwoPairs;
 
@@ -358,7 +360,90 @@ public class PokerHandEvaulatorTest {
 		Collections.sort(rest, new CardComparator());
 
 		if(!rest.get(0).getName().equals("5") || !rest.get(1).getName().equals("D") || !rest.get(2).getName().equals("K"))
+			fail();		
+	}
+
+	@Test
+	public void testFindHighCard() throws WrongColorException, WrongNameException {
+		List<Card> l1, l2, l3, l4, l5, l6, l7;
+		Card c1, c2, c3, c4, c5, c6, c7;
+		Player p = Mockito.mock(Player.class);
+		PokerHandEvaulator phe = new PokerHandEvaulator();
+		
+		l1 = new ArrayList<Card>();
+		l2 = new ArrayList<Card>();
+		l3 = new ArrayList<Card>();
+		l4 = new ArrayList<Card>();
+		l5 = new ArrayList<Card>();
+		l6 = new ArrayList<Card>();
+		l7 = new ArrayList<Card>();
+		
+		c1 = new Card("5", "pik");
+		c2 = new Card("8", "kier");
+		c3 = new Card("K", "kier");
+		c4 = new Card("7", "karo");
+		c5 = new Card("D", "pik");
+		c6 = new Card("2", "pik");
+		c7 = new Card("4", "trefl");
+		
+		l1.add(c1);
+		l2.add(c2);
+		l2.add(c2);
+		l3.add(c3);
+		l6.add(c6);
+		l4.add(c4);
+		l5.add(c5);
+		
+		Map<Card,List<Card>> arg = new TreeMap<Card,List<Card>>(new CardComparator());
+		arg.put(c1, l1);
+		arg.put(c2, l2);
+		arg.put(c3, l3);
+		arg.put(c4, l4);
+		arg.put(c5, l5);
+		arg.put(c6, l6);
+		arg.put(c7, l7);
+		
+		HighCard output = (HighCard) phe.findHighCard(p, arg);
+		
+		if(output == null)	
+			fail();
+		ArrayList<Card> cards = (ArrayList<Card>) output.getCards();
+		Collections.sort(cards, new CardComparator());
+
+		if(!cards.get(0).getName().equals("5") || !cards.get(1).getName().equals("7") || !cards.get(2).getName().equals("8") ||
+				!cards.get(3).getName().equals("D") || !cards.get(4).getName().equals("K"))
 			fail();
 			
+	}
+
+	@Test
+	public void testReturnBestPokerHand() throws WrongColorException, WrongNameException {
+		Card c1, c2, c3, c4, c5, c6, c7;
+		Player p = Mockito.mock(Player.class);
+		PokerHandEvaulator phe = new PokerHandEvaulator();
+		
+		List<Card> cards = new ArrayList<Card>();
+
+		
+		c1 = new Card("5", "pik");
+		c2 = new Card("8", "karo");
+		c3 = new Card("K", "kier");
+		c4 = new Card("7", "karo");
+		c5 = new Card("7", "pik");
+		c6 = new Card("2", "pik");
+		c7 = new Card("8", "trefl");
+		
+		cards.add(c1);
+		cards.add(c2);
+		cards.add(c3);
+		cards.add(c4);
+		cards.add(c5);
+		cards.add(c6);
+		cards.add(c7);
+		
+		PokerHand output = phe.returnBestPokerHand(p, cards);
+		
+		if(!(output instanceof TwoPairs))
+			fail();
 	}
 }
