@@ -1,6 +1,5 @@
 package pokerhand;
 
-import exceptions.PokerHandException;
 import model.Card;
 import model.CardComparator;
 import model.Player;
@@ -11,7 +10,7 @@ public class TwoPairs extends PokerHand {
 	private Card secondPair;
 	private Card kicker;
 	
-	public TwoPairs(Player player, Card firstPair, Card secondPair, Card kicker) throws PokerHandException{
+	public TwoPairs(Player player, Card firstPair, Card secondPair, Card kicker) {
 		super(player);
 		this.firstPair = firstPair;
 		this.secondPair = secondPair;
@@ -50,6 +49,4 @@ public class TwoPairs extends PokerHand {
 				return cc.compare(tp1.getKicker(), tp2.getKicker());
 		}
 	}
-	
-
 }
