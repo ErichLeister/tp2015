@@ -14,6 +14,7 @@ import org.mockito.Mockito;
 
 import exceptions.WrongColorException;
 import exceptions.WrongNameException;
+import pokerhand.Flush;
 import pokerhand.FourOfAKing;
 import pokerhand.FullHouse;
 
@@ -177,5 +178,48 @@ public class PokerHandEvaulatorTest {
 
 		if(output == null || !output.getThree().getName().equals("8"))
 			fail();
+	}
+	
+	@Test
+	public void testFindFlush() throws WrongColorException, WrongNameException {
+		List<Card> l1, l2, l3, l4, l5;
+		Card c1, c2, c3, c4, c5, c6, c7;
+		Player p = Mockito.mock(Player.class);
+		PokerHandEvaulator phe = new PokerHandEvaulator();
+		
+		l1 = new ArrayList<Card>();
+		l2 = new ArrayList<Card>();
+		l3 = new ArrayList<Card>();
+		l4 = new ArrayList<Card>();
+		l5 = new ArrayList<Card>();
+		
+		c1 = new Card("5", "pik");
+		c2 = new Card("W", "pik");
+		c3 = new Card("K", "kier");
+		c4 = new Card("8", "karo");
+		c5 = new Card("K", "pik");
+		c6 = new Card("7", "pik");
+		c7 = new Card("8", "pik");
+		
+		l1.add(c1);
+		l2.add(c2);
+		l3.add(c3);
+		l3.add(c5);
+		l4.add(c4);
+		l4.add(c7);
+		l5.add(c6);
+		
+		Map<Card,List<Card>> arg = new TreeMap<Card,List<Card>>(new CardComparator());
+		arg.put(c1, l1);
+		arg.put(c2, l2);
+		arg.put(c3, l3);
+		arg.put(c4, l4);
+		arg.put(c6, l5);
+		
+		Flush output = (Flush) phe.findFlush(p, arg);
+
+		if(output == null)
+			fail();
+		
 	}
 }

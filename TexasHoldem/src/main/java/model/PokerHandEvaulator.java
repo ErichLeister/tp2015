@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import exceptions.PokerHandException;
+import pokerhand.Flush;
 import pokerhand.FourOfAKing;
 import pokerhand.FullHouse;
 import pokerhand.PokerHand;
@@ -49,7 +51,7 @@ public class PokerHandEvaulator {
 		}
 		return output;
 	}
-	
+
 	public PokerHand findStraightflush(Player p, Map<Card, List<Card>> cards) {
 		CardComparator cc = new CardComparator();
 		TreeSet<Card> ts = new TreeSet<Card>(cc);
@@ -111,8 +113,7 @@ public class PokerHandEvaulator {
 			}
 		}
 		
-		return (isFound ? new FourOfAKing(p, outputCard) : null);
-		
+		return (isFound ? new FourOfAKing(p, outputCard) : null);		
 	}
 	
 	public PokerHand findFullHouse(Player p, Map<Card, List<Card>> cards) {
@@ -138,5 +139,75 @@ public class PokerHandEvaulator {
 			}
 		}
 		return (isThreeFound && isPairFound ? new FullHouse(p, outputThree) : null);
+	}
+	
+	public PokerHand findFlush(Player p, Map<Card, List<Card>> cards) {
+		CardComparator cc = new CardComparator();
+		TreeSet<Card> ts = new TreeSet<Card>(cc);
+		ts.addAll(cards.keySet());
+		
+		Iterator<Card> it = ts.descendingIterator();
+		Iterator<Card> itColor = null;
+
+		boolean isFound = false;
+		
+		List<Card> treflCards = new ArrayList<Card>();
+		List<Card> karoCards = new ArrayList<Card>();
+		List<Card> pikCards = new ArrayList<Card>();
+		List<Card> kierCards = new ArrayList<Card>();
+		
+		Card card;
+		Card card1; //template card in a loop inside a list in the map 
+		
+		List<Card> output = null;
+
+		while(it.hasNext() && !isFound) {
+			card = it.next();
+			itColor = cards.get(card).iterator();
+			
+			while(itColor.hasNext()) {
+				card1 = itColor.next();
+				
+				if(card1.getColor().equals("trefl")) {
+					treflCards.add(card1);
+					if(treflCards.size() == 5) {
+						isFound = true;
+						output = treflCards;
+					}
+				}
+				else if(card1.getColor().equals("karo")) {
+					karoCards.add(card1);
+					if(karoCards.size() == 5) {
+						isFound = true;
+						output = karoCards;
+					}
+				}
+				else if(card1.getColor().equals("pik")) {
+					pikCards.add(card1);
+					if(pikCards.size() == 5) {
+						isFound = true;
+						output = pikCards;
+					}
+				}
+				else if(card1.getColor().equals("kier")) {
+					kierCards.add(card1);
+					if(kierCards.size() == 5) {
+						isFound = true;
+						output = kierCards;
+					}
+				}
+			}		
+		}
+		if(isFound) {
+			Flush outcome = null;
+			try {
+				outcome = new Flush(p, output);
+			} catch (PokerHandException e) {
+				e.printStackTrace();
+			}
+			return outcome;
+		}
+		else
+			return null;
 	}
 }
