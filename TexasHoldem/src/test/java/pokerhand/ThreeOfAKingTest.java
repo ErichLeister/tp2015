@@ -10,7 +10,7 @@ import exceptions.WrongNameException;
 import model.Card;
 import model.Player;
 
-public class FlushTest {
+public class ThreeOfAKingTest {
 
 	@Test
 	public void testSubCompare() throws WrongColorException, WrongNameException {		

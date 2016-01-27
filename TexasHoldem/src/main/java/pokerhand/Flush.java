@@ -35,7 +35,7 @@ public class Flush extends PokerHand {
 		int outcome = 0;
 		
 		try {
-			outcome = this.compareCardLists(l1, l2, cc);
+			outcome = cc.compareCardLists(l1, l2, cc);
 		} catch (NotSameListsLengthException e) {
 			e.getMessage();
 		}

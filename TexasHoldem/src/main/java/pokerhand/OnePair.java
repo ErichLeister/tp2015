@@ -16,7 +16,12 @@ public class OnePair extends PokerHand {
 	public OnePair(Player player, Card pair, List<Card> rest) throws PokerHandException {
 		super(player);
 		if(!(rest.size() == 3))
+			throw new PokerHandException(this);
+		
+		for(Card c : rest) {
+			if(c.getName().equals(pair.getName()))
 				throw new PokerHandException(this);
+		}
 		this.pair = pair;
 		this.rest = rest;
 	}
@@ -38,20 +43,19 @@ public class OnePair extends PokerHand {
 		
 		OnePair op1 = (OnePair)o1;
 		OnePair op2 = (OnePair)o2;
-		
-		int pairValueComp =(cc.compare(op1.getPair(), op2.getPair()));
+		System.out.println("b");
+		int pairValueComp = cc.compare(op1.getPair(), op2.getPair());
 		if (pairValueComp != 0)
 			return pairValueComp;
 		else {
+			System.out.println("c");
 			int outcome = 0;
 			try {
-				outcome = this.compareCardLists(op1.getRest(), op2.getRest(), cc);
-			}
-			catch(NotSameListsLengthException e) {
-				System.err.println(e.getMessage());
-			}
+				System.out.println("d");
+				outcome = cc.compareCardLists(op1.getRest(), op2.getRest(), cc);
+				System.out.println("e");
+			} catch (NotSameListsLengthException e) {}
 			return outcome;
 		}
 	}
-
 }

@@ -10,10 +10,10 @@ import exceptions.WrongNameException;
 import model.Card;
 import model.Player;
 
-public class FlushTest {
+public class StraightTest {
 
 	@Test
-	public void testSubCompare() throws WrongColorException, WrongNameException {		
+	public void testSubCompare() throws WrongColorException, WrongNameException {
 		Card t1 = new Card("D", "pik");
 		Card t2 = new Card("5", "kier");
 		
