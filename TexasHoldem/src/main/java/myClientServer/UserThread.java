@@ -1,15 +1,16 @@
 package myClientServer;
 
 import java.io.IOException;
+import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 public class UserThread extends Thread{
-	private ObjectInputStream in;
+	private ObjectInput in;
 	private Socket socket;
 	private Answer answer;
 	private RealUser user;
 	
-	UserThread(ObjectInputStream in, RealUser user, Socket socket){
+	UserThread(ObjectInput in, RealUser user, Socket socket){
 		this.user = user;
 		this.in = in;
 		this.socket = socket;

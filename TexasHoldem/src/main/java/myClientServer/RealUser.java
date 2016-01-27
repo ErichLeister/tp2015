@@ -2,6 +2,7 @@ package myClientServer;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
@@ -9,19 +10,16 @@ public class RealUser {
 	private String nick;
 	private UserThread userThread;
 	private MyServer server;
-	private ObjectOutputStream out;
+	private ObjectOutput out;
 	private Answer answer;
+	private Socket socket;
 	RealUser(Socket socket, MyServer server){
 		nick = "no name";
 		this.server = server;
-    	
+    	this.socket = socket;
 		try {
 			out = new ObjectOutputStream(socket.getOutputStream());
 			this.out = out;
-	        ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-			this.userThread = new UserThread(in, this, socket);
-	    	userThread.start();
-			giveMessage(new Message());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -29,14 +27,21 @@ public class RealUser {
 
 
 	}
-	private Answer checkAnswear(Answer answear){
+	/*private Answer checkAnswear(Answer answear){
 		return answear;
-	}
-	public Answer getAnswer(){
+	}*/
+	public Answer getAnswer(int seconds){
 		setAnswer(new Answer());
 		try {
 			synchronized(this){
-				wait();
+				if (seconds == 0)
+				{
+					wait();
+				}
+				else if(seconds > 0)
+				{
+					wait(seconds * 1000);
+				}
 				return answer;
 			}
 		} catch (InterruptedException e) {
@@ -57,5 +62,12 @@ public class RealUser {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	public void initRealUser(UserThread userThread){
+        ObjectInputStream in;
+			this.userThread = userThread;
+	    	userThread.start();
+			giveMessage(new Message());
+
 	}
 }
