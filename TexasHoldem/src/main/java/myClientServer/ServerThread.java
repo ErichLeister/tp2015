@@ -17,12 +17,9 @@ public class ServerThread extends Thread{
 	        while(true){
 	        Socket socket = listener.accept();
 
-	        System.out.println("test2");
-        	ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-	        System.out.println("test3");
-	        ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+
 	        
-	        server.addUser(in, out);
+	        server.addUser(socket);
 		        }
 	        } 
         		catch(IOException e)
