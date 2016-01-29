@@ -65,6 +65,7 @@ public class Dealer {
 		}
 		if(WasLastPokerHandToPreviosOne)
 			outcome.put(place, playersWithSameScore);
+		
 		return outcome;
 	}
 }
