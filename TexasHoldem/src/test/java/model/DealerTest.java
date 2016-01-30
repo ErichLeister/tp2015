@@ -158,13 +158,6 @@ public class DealerTest {
 		Dealer dealer = new Dealer(common, players);
 		Map<Integer, List<Player>> outcome = dealer.getChartOfWinners();
 		
-		System.out.println(outcome.get(1));
-		System.out.println(outcome.get(2));
-		System.out.println(outcome.get(3));
-		System.out.println(outcome.get(4));
-		System.out.println(outcome.get(5));
-		System.out.println(outcome.get(6));
-		
 		if(!((outcome.get(1).size() == 2) && outcome.get(1).contains(p4) && outcome.get(1).contains(p6)))
 				fail();
 		if(!((outcome.get(2).size() == 1) && outcome.get(2).contains(p1)))
