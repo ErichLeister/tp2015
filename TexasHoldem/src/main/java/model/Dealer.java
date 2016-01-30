@@ -39,7 +39,6 @@ public class Dealer {
 		}
 		Collections.sort(pokerHands, Collections.reverseOrder(new PokerHandComparator()));
 		
-		boolean WasLastPokerHandToPreviosOne = false;
 		PokerHandComparator phc = new PokerHandComparator();
 		PokerHand ph;
 		int place = 1;
@@ -52,20 +51,16 @@ public class Dealer {
 			ph = it.next();
 			if(phc.compare(lastPh, ph) == 0) {
 				playersWithSameScore.add(ph.getPlayer());
-				WasLastPokerHandToPreviosOne = true;
 			}
 			else {
 				outcome.put(place, playersWithSameScore);
 				place++;
 				playersWithSameScore = new ArrayList<Player>();
 				playersWithSameScore.add(ph.getPlayer());
-				WasLastPokerHandToPreviosOne = false;
 			}
 			lastPh = ph;
 		}
-		if(WasLastPokerHandToPreviosOne)
-			outcome.put(place, playersWithSameScore);
-		
+		outcome.put(place, playersWithSameScore);
 		return outcome;
 	}
 }
