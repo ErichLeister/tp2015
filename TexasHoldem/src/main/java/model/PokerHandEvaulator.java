@@ -371,6 +371,9 @@ public class PokerHandEvaulator {
 		outcome = findFlush(p, groupedCards);
 		if(outcome != null)
 			return outcome;
+		outcome = findStraight(p, groupedCards);
+		if(outcome != null)
+			return outcome;
 		outcome = findThreeOfAKing(p, groupedCards);
 		if(outcome != null)
 			return outcome;
