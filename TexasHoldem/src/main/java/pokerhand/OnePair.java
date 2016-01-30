@@ -43,17 +43,15 @@ public class OnePair extends PokerHand {
 		
 		OnePair op1 = (OnePair)o1;
 		OnePair op2 = (OnePair)o2;
-		System.out.println("b");
+
 		int pairValueComp = cc.compare(op1.getPair(), op2.getPair());
 		if (pairValueComp != 0)
 			return pairValueComp;
 		else {
-			System.out.println("c");
+
 			int outcome = 0;
 			try {
-				System.out.println("d");
 				outcome = cc.compareCardLists(op1.getRest(), op2.getRest(), cc);
-				System.out.println("e");
 			} catch (NotSameListsLengthException e) {}
 			return outcome;
 		}
