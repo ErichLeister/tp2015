@@ -17,6 +17,10 @@ public class Straight extends PokerHand {
 	public int getRank() {
 		return rank;
 	}
+	
+	public Card getHighestCard() {
+		return this.highestCard;
+	}
 
 	@Override
 	public int subCompare(PokerHand o1, PokerHand o2) {
