@@ -15,17 +15,13 @@ import pokerhand.FullHouse;
 import pokerhand.HighCard;
 import pokerhand.OnePair;
 import pokerhand.PokerHand;
+import pokerhand.Straight;
 import pokerhand.StraightFlush;
 import pokerhand.ThreeOfAKing;
 import pokerhand.TwoPairs;
 
 
 public class PokerHandEvaulator {
-	private List<PokerHand> pokerHand;
-	
-	public PokerHandEvaulator() {
-		this.pokerHand = null;
-	}
 	
 	public Map<Card, List<Card>> groupCards(List<Card> cards) {
 		CardComparator cc = new CardComparator();
@@ -213,6 +209,34 @@ public class PokerHandEvaulator {
 		}
 		else
 			return null;
+	}
+	
+	public PokerHand findStraight(Player p, Map<Card, List<Card>> cards) {
+		CardComparator cc = new CardComparator();
+		TreeSet<Card> ts = new TreeSet<Card>(cc);
+		ts.addAll(cards.keySet());
+		
+		Iterator<Card> it = ts.descendingIterator();
+		boolean isFound = false;
+		Card card = null;
+		Card max = it.next();
+		Card last = max;
+		
+		int i = 1;
+		while(it.hasNext() && !isFound) {
+			card = it.next();
+			if(cc.isSuccessor(last, card)) {
+				i++;
+				if(i == 5)
+					isFound = true;
+			}
+			else {
+				i = 1;
+				max = card;
+			}
+			last = card;
+		}
+		return (isFound ? new Straight(p, max) : null);		
 	}
 
 	public PokerHand findThreeOfAKing(Player p, Map<Card, List<Card>> cards) {
