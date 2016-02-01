@@ -120,6 +120,7 @@ public class Game {
           player.addObserver(otherPlayer);
         }
       }
+      player.setPlayerStateBehavior(PlayerState.INIT.getStateBehavior());
     }
   }
   
@@ -130,8 +131,9 @@ public class Game {
     if (player.getChips() <= this.smallBlindAmount) {
       this.addPlayerAllInChips(player, 2 * player.getChips());
       player.setPlayerStateBehavior(player.getPlayerStateBehavior().allin());
-      player.notifyObservers("rise");
+      player.notifyObservers("smallBlind");
       this.pot = player.getChips();
+      player.setChips(0);
       
     } else {
       try {
@@ -140,8 +142,9 @@ public class Game {
         e.printStackTrace();
       }
       player.notifyObservers("smallBlind");
-      player = players.get(getNextIndex(index));
+      player.setChips(player.getChips() - smallBlindAmount);
       this.pot = this.smallBlindAmount;
+      
     }
   }
   
@@ -153,8 +156,9 @@ public class Game {
       this.addPlayerAllInChips(player, 2 * player.getChips());
       if (player.getChips() > this.pot) {
         player.notifyObservers("rise");
-        this.pot = player.getChips();
       }
+      this.pot = this.pot + player.getChips();
+      player.setChips(0);
       player.setPlayerStateBehavior(player.getPlayerStateBehavior().allin());
     } else {
       try {
@@ -162,7 +166,9 @@ public class Game {
       } catch (InvalidMoveException e) {
         e.printStackTrace();
       }
-    player.notifyObservers("bigBlind");
+      player.notifyObservers("bigBlind");
+      player.withdrawChips(bigBlindAmount);
+      this.pot = this.pot + bigBlindAmount;
     }
   }
   
@@ -173,35 +179,38 @@ public class Game {
   }
   
   // Returns an index of a next player
-//  public int prepareRoundOfBetting(int roundNumber) {
-//    
-//    this.setForAllPlayersInitState();
-//    
-//    if (roundNumber == 0) {
-//      this.takeSmallBlind();
-//      this.takeBigBlind();
-//      
-//      this.commonCards = new ArrayList<Card>(); 
-//      
-//      return this.findIndexOfNextActivePlayer(this.findIndexOfBigBlind());
-//      
-//    } else if (roundNumber == 1) {
-//      try {
-//        commonCards.addAll(deck.pullCards(3));
-//      } catch (NotEnoughCardsException e) {
-//        //Shouldn't be thrown. Stack was recently filled with all available cards.
-//      } catch (NotPositiveAmountException e) {
-//        //Shouldn't be thrown. The method was called with an argument 2
-//      }
-//    } else {
-//      try {
-//        commonCards.add(deck.pullCard());
-//      } catch (NotEnoughCardsException e) {
-//        e.printStackTrace();
-//      }
-//      return this.findIndexOfStartingPlayer();
-//    }
-//  }
+  public int prepareRoundOfBetting(int roundNumber) {
+    
+    this.setForAllPlayersInitState();
+    
+    if (roundNumber == 0) {
+      this.takeSmallBlind();
+      this.takeBigBlind();
+      
+      this.commonCards = new ArrayList<Card>(); 
+      
+      return this.findIndexOfNextActivePlayer(this.findIndexOfBigBlind());
+      
+    } else if (roundNumber == 1) {
+      try {
+        commonCards.addAll(deck.pullCards(3));
+      } catch (NotEnoughCardsException e) {
+        //Shouldn't be thrown. Stack was recently filled with all available cards.
+      } catch (NotPositiveAmountException e) {
+        //Shouldn't be thrown. The method was called with an argument 2
+      }
+      
+      return this.findIndexOfStartingPlayer();
+      
+    } else {
+      try {
+        commonCards.add(deck.pullCard());
+      } catch (NotEnoughCardsException e) {
+        e.printStackTrace();
+      }
+      return this.findIndexOfStartingPlayer();
+    }
+  }
   
   public void startGame() {
     
