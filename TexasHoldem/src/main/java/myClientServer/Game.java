@@ -19,12 +19,12 @@ public class Game {
 	public void startGame(){
 		//players.get(0) = "player 1";
 		//players.get(1).a = "player 2";
-		while(1==1)
-		{
+		//while(1==1)
+		//{
 			for(Player player : players){
 				player.sendMessage("message");
 			}
 			players.get(0).getAnswer();
-		}
+		//}
 	}
 }

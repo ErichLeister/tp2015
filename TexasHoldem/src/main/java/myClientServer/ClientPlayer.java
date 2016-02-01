@@ -4,16 +4,24 @@ public class ClientPlayer {
 	public String name;
 	public String state;
 	public int cash;
+	public int bet;
 	ClientPlayer(String name, int cash){
 		this.name = name;
 		this.cash = cash;
-		state = "Test State";
+		state = "Initial State";
+		bet = 0;
 	}
 	public void setCash(int cash){
 		this.cash = cash;
 	}
 	public int getCash(){
 		return cash;
+	}
+	public void setBet(int bet){
+		this.bet = bet;
+	}
+	public int getBet(){
+		return bet;
 	}
 	public String getName(){
 		return name;
