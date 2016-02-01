@@ -55,7 +55,7 @@ public class RealUser {
 	public synchronized void setAnswer(Answer answer){
 		this.answer = answer;
 	}
-	public void giveMessage(Message message){
+	public void giveMessage(MessageInterface message){
 		try {
 			out.writeObject(message);
 		} catch (IOException e) {

@@ -13,6 +13,7 @@ public class MyServer {
 
 	private List<RealUser> users;
 	private WaitingForGameStart waiting;
+	private int minGamers = 1;
 	
 	public MyServer(){
 		users = new ArrayList<RealUser>();
@@ -22,11 +23,11 @@ public class MyServer {
 	}
 	private boolean shouldGameStart(){
 		boolean should = false;
-		if(users.size()>=1)
+		if(users.size()>=minGamers)
 			should = true;
 		return should;
 	}
-	public void giveMessageToAllUsers(Message message){
+	public void giveMessageToAllUsers(MessageInterface message){
 		for(RealUser user : users){
 			user.giveMessage(message);
 		}
@@ -34,7 +35,19 @@ public class MyServer {
     public static void main(String[] args){
     	MyServer server = new MyServer();
 		server.waiting.waitForGameStart();
-    	server.users.get(0).getAnswer(0);
+		//MessageInterface message = new MessageDecoratorAskPlayersNumber(new Message("decorator message test sended by socket"));
+		//server.users.get(0).giveMessage(message);
+    	//server.users.get(0).getAnswer(0);
+    	int answerInt = -1;
+    	do{
+    		 answerInt = server.askQuestionInt(0, "Podaj liczbe graczy", 10, 0);
+    	}
+    	while(answerInt == -1);
+    	server.minGamers = 3;
+    	if(server.users.size() < server.minGamers)
+    	{
+    		server.waiting.waitForGameStart();
+    	}
     	/*try {
     		synchronized(server){
 			server.wait(10000);
@@ -46,6 +59,16 @@ public class MyServer {
 		Game game = new Game(server.users);
 		game.startGame();
 		//server.giveMessageToAllUsers(new Message("PoczatekGry"));
+    }
+    public int askQuestionInt(int indexOfUser, String question, int max, int min){
+    	MessageInterface message = 
+    			new MessageDecoratorAskPlayersNumber(new Message(question));
+    	users.get(0).giveMessage(message);
+    	int answer = users.get(indexOfUser).getAnswer(0).getMessageInt();
+    	if (answer < min || answer > max){
+    		answer = -1;
+    	}
+    	return answer;
     }
     public void addUser(Socket socket){
     	//System.out.println("testU");

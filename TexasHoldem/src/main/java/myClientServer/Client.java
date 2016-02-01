@@ -22,8 +22,11 @@ public class Client {
     private ObjectOutputStream out;
     
     private GUI gui;
+    private GameSituation situation;
     
-    public Client(GUI gui){
+    int decisionToMake;
+    
+    public Client(){
         /*frame = new JFrame("Capitalize Client");
         dataField = new JTextField(40);
         dataField.addActionListener(new ActionListener() 
@@ -47,20 +50,84 @@ public class Client {
         frame.getContentPane().add(dataField, "North");
         frame.getContentPane().add(new JScrollPane(messageArea), "West");
         frame.getContentPane().add(contentPane, "East");*/
-        this.gui = gui;
+    	situation = new GameSituation();
+        gui = new GUI(situation, this);
     }
-    
-    static public GUI createGUI(){
-    	GUI gui = new GUI();
-    	return gui;
+    public void answerStringQuestion(String answer){
+    	if(decisionToMake == 1){
+    	int a = Integer.parseInt(answer);
+    	System.out.println(a);
+    	
+    	/*try {
+    		synchronized(this)
+    		{
+			wait(5000);
+    		}
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+    	
+    	askAboutNumberOfPlayers();
+    	}
     }
-    
+    public GameSituation getGameSituation(){
+    	return situation;
+    }
+    public void draw(){
+    	gui.draw();
+    }
+    public void askAboutNumberOfPlayers()
+    {
+    	decisionToMake = 1;
+    	gui.askAboutNumber("Podaj ilosc graczy");
+    }
+    public void askAboutPlay()
+    {
+    	decisionToMake = 2;
+    }
+    public void askQusetion(){
+    	gui.askQuestion();
+    	try {
+			out.writeObject(new Answer());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
     public static void main(String[] args) throws Exception{
-    	Client client = new Client(Client.createGUI());
+    	Client client = new Client();
+    	/*client.askAboutNumberOfPlayers();
+    	try {
+		synchronized(client)
+		{
+		client.wait(5000);
+		}
+	} catch (InterruptedException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+	
+	client.askAboutNumberOfPlayers();*/
+	
+    	ClientPlayer player = new ClientPlayer("player1",10);
+    	ClientPlayer player2 = new ClientPlayer("player2",120);
+    	GameSituation s = client.getGameSituation();
+    	//MessageInterface message = new MessageDecoratorSetBet(0,20,new MessageDecoratorAddPlayer(player,new Message()));
+    	MessageInterface message = new MessageDecoratorAddPlayer(player2,
+    			new MessageDecoratorAddPlayer(player,new Message()));
+    	//MessageInterface message = new MessageDecoratorAddPlayer(player,new MessageDecoratorSetBet(0,0,new Message()));
+    	message.setClient(client);
+    	message.affectClient();
+    	message = new MessageDecoratorSetBet(0,888,new Message());
+    	message.setClient(client);
+    	message.affectClient();
+    	client.draw();
+    	//client.connectToServer();
         /*client.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         client.frame.pack();
         client.frame.setVisible(true);*/
-    	client.connectToServer();
+
     }
     public void connectToServer() {
 
@@ -86,21 +153,30 @@ public class Client {
 
 
         // Consume the initial welcoming messages from the server
-        Message message;
+        MessageInterface message;
         boolean isGameRunning = true;
         while(isGameRunning == true)
         {
 			try {
 				try {
-					message = (Message)in.readObject();
+					System.out.println("---+++---");
+					message = (MessageInterface)in.readObject();
+					//message = new MessageDecoratorAskPlayersNumber(new Message());
+					System.out.println(message.getMessage());
+			    	message.setClient(this);
+			    	message.affectClient();
+			    	//gui.askQuestion();
+			    	//out.writeObject(new Answer());
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
+					return;
 				}
 		        //messageArea.append(message.getMessage() + "\n");
 			} catch (ClassNotFoundException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
+				return;
 			}
         }
 		try {

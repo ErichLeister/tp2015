@@ -10,7 +10,7 @@ public class GameSituation {
 	
 	public GameSituation(){
 		players = new ArrayList<ClientPlayer>();
-		exampleSituation();
+		//exampleSituation();
 	}
 	public void addPlayer(){
 		
