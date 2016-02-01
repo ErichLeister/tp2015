@@ -63,6 +63,10 @@ public class Player implements PlayerObserver, PlayerObservable {
     this.chips = chips;
   }
   
+  public void withdrawChips(int chips) {
+    this.chips = this.chips - chips;
+  }
+  
   public void addCards(List<Card> cards) {
     this.cards.addAll(cards);
   }
@@ -95,11 +99,11 @@ public class Player implements PlayerObserver, PlayerObservable {
   @Override
   public void update(String betType) {
     if (betType.equals("rise")) {
-      this.playerStateBehavior.somebodyRaise();
+      this.playerStateBehavior = this.getPlayerStateBehavior().somebodyRaise();
     } else if (betType.equals("smallBlind")) {
-      this.playerStateBehavior.somebodySmallBlind();
+      this.playerStateBehavior = this.getPlayerStateBehavior().somebodySmallBlind();
     } else if (betType.equals("bigBlind")) {
-      this.playerStateBehavior.somebodyBigBlind();
+      this.playerStateBehavior = this.getPlayerStateBehavior().somebodyBigBlind();
     }
   }
 }
