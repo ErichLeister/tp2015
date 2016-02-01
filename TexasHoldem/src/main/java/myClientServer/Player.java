@@ -6,8 +6,8 @@ public class Player {
 	public Player(RealUser user){
 		this.user = user;
 	}
-	public void sendMessage(){
-		user.giveMessage(new Message(a));
+	public void sendMessage(MessageInterface message){
+		user.giveMessage(message);
 	}
 	public Answer getAnswer(){
 		return user.getAnswer(10);
