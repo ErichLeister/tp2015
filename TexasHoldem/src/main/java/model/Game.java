@@ -1,0 +1,209 @@
+package model;
+
+import exceptions.InvalidMoveException;
+import exceptions.NotEnoughCardsException;
+import exceptions.NotPositiveAmountException;
+import playerstate.AllInState;
+import playerstate.FoldState;
+import playerstate.PlayerState;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
+public class Game {
+ 
+  private List<Card> commonCards;
+  private List<Player> players;
+  private int pot;
+  private int initialChipsPerPlayer;
+  private Deck deck;
+  private Player dealerButton;
+  private int smallBlindAmount;
+  private int bigBlindAmount;
+  private Map<Player, Integer> playerAllInBet;
+  
+  public Game(List<Player> players, int initialChipsPerPlayer, int smallBlindAmount, int bigBlindAmount) {
+    this.commonCards = new ArrayList<Card>();
+    this.players = players;
+    this.initialChipsPerPlayer = initialChipsPerPlayer;
+    this.deck = new Deck();
+    this.dealerButton = null;
+    this.pot = 0;
+    this.smallBlindAmount = smallBlindAmount;
+    this.bigBlindAmount = bigBlindAmount;
+    playerAllInBet = new HashMap<Player, Integer>();
+  }
+  
+  // Regroup the list of players, so a player with the big blind is on the last position in the list
+  public void regroupPlayersList() {
+    if (players.size() == 2) {
+      if (findIndexOfDealerButton() == 1) {
+        players.add(players.remove(0));
+      }
+    } else if (players.size() == 1) {
+    } else {
+      int index = findIndexOfDealerButton();
+      int indexOfBigBlind = (index + 2) % players.size();
+      
+      
+      while ((players.size() - indexOfBigBlind) > 0) {
+        players.add(players.get(0));
+      }
+    }
+    
+  }
+  
+  private void setDealerButton() {
+    Random rand = new Random();
+    this.dealerButton = players.get(rand.nextInt(players.size()));
+  }
+  
+  private int findIndexOfDealerButton() {
+    int index = 0;
+    while ((index < players.size()) && (! (players.get(index).equals(dealerButton)))) {
+      index++;
+    }
+    return index;
+  }
+  
+  private boolean isFoldOrAllin(Player player) {
+    return (player.getPlayerStateBehavior().getClass().equals(new FoldState().getClass())
+        || player.getPlayerStateBehavior().getClass().equals(new AllInState().getClass()));
+  }
+  
+  private int getNextIndex(int index) {
+    return (index + 1) % players.size();
+  }
+  
+  private int findIndexOfSmallBlind() {
+    return (findIndexOfDealerButton() + 1) % players.size();
+  }
+  
+  private int findIndexOfBigBlind() {
+    return (findIndexOfDealerButton() + 2) % players.size();
+  }
+  
+  // Return index of a Player with a non fold and non all-in state
+  private int findIndexOfNextActivePlayer(int index) {
+    while (this.isFoldOrAllin(players.get(index))) {
+      index = this.getNextIndex(index);
+    }
+    return index;
+  }
+  
+  private int findIndexOfStartingPlayer() {
+    int index = this.findIndexOfSmallBlind();
+    
+    while (this.isFoldOrAllin(players.get(index))) {
+      index = this.getNextIndex(index);
+    }
+    return index;
+  }
+  
+  private void addPlayerAllInChips(Player player, int chips) {
+    this.playerAllInBet.put(player, chips);
+  }
+  
+  public void prepareGame() {
+    deck.fillDeckWithAllCards();
+    deck.shuffleCards();
+    
+    this.setDealerButton();
+    
+    for (Player player : players) {
+      player.setChips(initialChipsPerPlayer);  
+      for (Player otherPlayer : players) {
+        if (! player.equals(otherPlayer)) {
+          player.addObserver(otherPlayer);
+        }
+      }
+    }
+  }
+  
+  private void takeSmallBlind() {
+    int index = this.findIndexOfSmallBlind();
+    Player player = players.get(index);
+
+    if (player.getChips() <= this.smallBlindAmount) {
+      this.addPlayerAllInChips(player, 2 * player.getChips());
+      player.setPlayerStateBehavior(player.getPlayerStateBehavior().allin());
+      player.notifyObservers("rise");
+      this.pot = player.getChips();
+      
+    } else {
+      try {
+        player.setPlayerStateBehavior(player.getPlayerStateBehavior().smallBlind());
+      } catch (InvalidMoveException e) {
+        e.printStackTrace();
+      }
+      player.notifyObservers("smallBlind");
+      player = players.get(getNextIndex(index));
+      this.pot = this.smallBlindAmount;
+    }
+  }
+  
+  private void takeBigBlind() {
+    int index = this.findIndexOfBigBlind();
+    Player player = players.get(index);
+    
+    if (player.getChips() <= this.bigBlindAmount) {
+      this.addPlayerAllInChips(player, 2 * player.getChips());
+      if (player.getChips() > this.pot) {
+        player.notifyObservers("rise");
+        this.pot = player.getChips();
+      }
+      player.setPlayerStateBehavior(player.getPlayerStateBehavior().allin());
+    } else {
+      try {
+        player.setPlayerStateBehavior(player.getPlayerStateBehavior().bigBlind());
+      } catch (InvalidMoveException e) {
+        e.printStackTrace();
+      }
+    player.notifyObservers("bigBlind");
+    }
+  }
+  
+  private void setForAllPlayersInitState() {
+    for (Player player : players) {
+      player.setPlayerStateBehavior(PlayerState.INIT.getStateBehavior());
+    }
+  }
+  
+  // Returns an index of a next player
+//  public int prepareRoundOfBetting(int roundNumber) {
+//    
+//    this.setForAllPlayersInitState();
+//    
+//    if (roundNumber == 0) {
+//      this.takeSmallBlind();
+//      this.takeBigBlind();
+//      
+//      this.commonCards = new ArrayList<Card>(); 
+//      
+//      return this.findIndexOfNextActivePlayer(this.findIndexOfBigBlind());
+//      
+//    } else if (roundNumber == 1) {
+//      try {
+//        commonCards.addAll(deck.pullCards(3));
+//      } catch (NotEnoughCardsException e) {
+//        //Shouldn't be thrown. Stack was recently filled with all available cards.
+//      } catch (NotPositiveAmountException e) {
+//        //Shouldn't be thrown. The method was called with an argument 2
+//      }
+//    } else {
+//      try {
+//        commonCards.add(deck.pullCard());
+//      } catch (NotEnoughCardsException e) {
+//        e.printStackTrace();
+//      }
+//      return this.findIndexOfStartingPlayer();
+//    }
+//  }
+  
+  public void startGame() {
+    
+  }
+}
