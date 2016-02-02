@@ -8,6 +8,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -42,11 +43,13 @@ public class GUI {
     JTextField dataField;
     
     private ArrayList <Dimension> userPlaces;
-    public void askAboutNumber(String question){
+    public void askAboutString(String question){
     	messageArea.setText(question);
         GridBagConstraints c = new GridBagConstraints();
         c.gridx = 1;
         c.gridy = 1;
+        c.weightx = 1;
+        //c.anchor
         c.fill = GridBagConstraints.BOTH;
         frame.add(dataField, c);
         
@@ -60,8 +63,8 @@ public class GUI {
     	
     	frame.pack();
     	frame.setVisible(true);*/
-
     }
+
     public void askAboutPlay(String question){/////////////////////////
     	messageArea.setText(question);
         GridBagConstraints c = new GridBagConstraints();
@@ -109,12 +112,14 @@ public class GUI {
         {
     	    public void actionPerformed(ActionEvent e) 
     	    {
-    	    	client.answerStringQuestion(dataField.getText());
+    	    	String answer = dataField.getText();
     	    	frame.remove(dataField);
     	    	frame.pack();
     	    	frame.setVisible(true);
     	    	
     	    	dataField.setText("");
+    	    	messageArea.setText("");
+    	    	client.answerStringQuestion(answer);
     	        /*GridBagConstraints c = new GridBagConstraints();
     	        c.gridx = 1;
     	        c.gridy = 1;
@@ -172,6 +177,7 @@ public class GUI {
         c.gridx = 0;
         c.gridy = 1;
         c.gridwidth = 1;
+        c.anchor = GridBagConstraints.WEST;
         Font f = new Font(null, Font.ITALIC, 30);
         messageArea.setFont(f);
         messageArea.setText("welcome");
@@ -199,10 +205,23 @@ public class GUI {
 			int y = userPlaces.get(a).height;
 			g.drawImage(avatarPicture,x, y, null);
 			g.setColor(Color.RED);
-			g.drawString(situation.players.get(a).getName(), 5 + x, 20 + y);
-			g.drawString(Integer.toString(situation.players.get(a).getCash()), x + 5, y + 40);
-			g.drawString(Integer.toString(situation.players.get(a).getBet()), x + 5, y + 60);
+			g.drawString("name: " + situation.players.get(a).getName(), 5 + x, 20 + y);
+			g.drawString("cash: " +  Integer.toString(situation.players.get(a).getCash()), x + 5, y + 40);
+			g.drawString("bet: " +  Integer.toString(situation.players.get(a).getBet()), x + 5, y + 60);
+			g.drawString("state: " +  situation.players.get(a).getState(), x + 5, y + 80);	
+			if(situation.players.get(a).getBigBlind())
+			g.drawString("*** Big Blind ***", x + 5, y + 100);	
 			
+			g.drawRoundRect(0, 0,
+                    50,
+                    50,
+                    100, 100);
+			if(situation.cards.get(0) != "" && situation.cards.get(0) != null){
+				g.drawRoundRect(0, 0,
+	                    50,
+	                    50,
+	                    100, 100);
+			}
 		}
 		//g.drawImage(avatarPicture,0,0, null);
 		g.setFont(new Font("TimesRoman", Font.PLAIN, 30)); 

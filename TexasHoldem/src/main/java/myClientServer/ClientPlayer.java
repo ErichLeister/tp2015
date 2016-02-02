@@ -1,15 +1,19 @@
 package myClientServer;
 
-public class ClientPlayer {
+import java.io.Serializable;
+
+public class ClientPlayer implements Serializable {
 	public String name;
 	public String state;
 	public int cash;
 	public int bet;
+	public boolean bigBlind;
 	ClientPlayer(String name, int cash){
 		this.name = name;
 		this.cash = cash;
 		state = "Initial State";
 		bet = 0;
+		bigBlind = false;
 	}
 	public void setCash(int cash){
 		this.cash = cash;
@@ -31,5 +35,11 @@ public class ClientPlayer {
 	}
 	public String getState(){
 		return state;
+	}
+	public void setBigBlind(boolean b){
+		bigBlind = b;
+	}
+	public boolean getBigBlind(){
+		return bigBlind;
 	}
 }
