@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.Socket;
 
 public class RealUser {
@@ -55,7 +56,7 @@ public class RealUser {
 	public synchronized void setAnswer(Answer answer){
 		this.answer = answer;
 	}
-	public void giveMessage(MessageInterface message){
+	public void giveMessage(Serializable message){
 		try {
 			out.writeObject(message);
 		} catch (IOException e) {

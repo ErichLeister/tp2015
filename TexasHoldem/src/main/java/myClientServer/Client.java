@@ -55,9 +55,31 @@ public class Client {
     }
     public void answerStringQuestion(String answer){
     	if(decisionToMake == 1){
-    	int a = Integer.parseInt(answer);
-    	System.out.println(a);
-    	
+	    	int a = Integer.parseInt(answer);
+	    	try {
+				out.writeObject(new Answer("Ile graczy",a));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	    else if(decisionToMake == 2){
+	    	try {
+				out.writeObject(new Answer("Jaka decyzja",answer));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+    	}
+	    else if(decisionToMake == 3){
+	    	int a = Integer.parseInt(answer);
+	    	try {
+				out.writeObject(new Answer("Jaki zaklad",a));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
     	/*try {
     		synchronized(this)
     		{
@@ -68,8 +90,7 @@ public class Client {
 			e.printStackTrace();
 		}*/
     	
-    	askAboutNumberOfPlayers();
-    	}
+       	//askAboutBet();
     }
     public GameSituation getGameSituation(){
     	return situation;
@@ -80,11 +101,17 @@ public class Client {
     public void askAboutNumberOfPlayers()
     {
     	decisionToMake = 1;
-    	gui.askAboutNumber("Podaj ilosc graczy");
+    	gui.askAboutString("Podaj ilosc graczy");
     }
     public void askAboutPlay()
     {
     	decisionToMake = 2;
+    	gui.askAboutString("Co teraz robisz?");
+    }
+    public void askAboutBet()
+    {
+    	decisionToMake = 3;
+    	gui.askAboutString("Podaj kwote zakladu");
     }
     public void askQusetion(){
     	gui.askQuestion();
@@ -97,8 +124,8 @@ public class Client {
     }
     public static void main(String[] args) throws Exception{
     	Client client = new Client();
-    	/*client.askAboutNumberOfPlayers();
-    	try {
+    	//client.askAboutNumberOfPlayers();
+    	/*try {
 		synchronized(client)
 		{
 		client.wait(5000);
@@ -110,20 +137,20 @@ public class Client {
 	
 	client.askAboutNumberOfPlayers();*/
 	
-    	ClientPlayer player = new ClientPlayer("player1",10);
-    	ClientPlayer player2 = new ClientPlayer("player2",120);
-    	GameSituation s = client.getGameSituation();
+    	//ClientPlayer player = new ClientPlayer("player1",10);
+    	//ClientPlayer player2 = new ClientPlayer("player2",120);
+    	//GameSituation s = client.getGameSituation();
     	//MessageInterface message = new MessageDecoratorSetBet(0,20,new MessageDecoratorAddPlayer(player,new Message()));
-    	MessageInterface message = new MessageDecoratorAddPlayer(player2,
-    			new MessageDecoratorAddPlayer(player,new Message()));
+    	//MessageInterface message = new MessageDecoratorAddPlayer(player2,
+    	//		new MessageDecoratorAddPlayer(player,new Message()));
     	//MessageInterface message = new MessageDecoratorAddPlayer(player,new MessageDecoratorSetBet(0,0,new Message()));
-    	message.setClient(client);
-    	message.affectClient();
-    	message = new MessageDecoratorSetBet(0,888,new Message());
-    	message.setClient(client);
-    	message.affectClient();
+    	//message.setClient(client);
+    	//message.affectClient();
+    	//message = new MessageDecoratorSetBet(0,888,new Message());
+    	//message.setClient(client);
+    	//message.affectClient();
     	client.draw();
-    	//client.connectToServer();
+    	client.connectToServer();
         /*client.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         client.frame.pack();
         client.frame.setVisible(true);*/
@@ -165,6 +192,7 @@ public class Client {
 					System.out.println(message.getMessage());
 			    	message.setClient(this);
 			    	message.affectClient();
+			    	gui.draw();
 			    	//gui.askQuestion();
 			    	//out.writeObject(new Answer());
 				} catch (IOException e) {

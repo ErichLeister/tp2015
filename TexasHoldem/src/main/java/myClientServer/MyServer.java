@@ -40,10 +40,11 @@ public class MyServer {
     	//server.users.get(0).getAnswer(0);
     	int answerInt = -1;
     	do{
-    		 answerInt = server.askQuestionInt(0, "Podaj liczbe graczy", 10, 0);
+    		 answerInt = server.askAboutPlayersNumber(0, "Podaj liczbe graczy", 10, 0);
+    		 //System.out.println(answerInt);
     	}
     	while(answerInt == -1);
-    	server.minGamers = 3;
+    	server.minGamers = answerInt;
     	if(server.users.size() < server.minGamers)
     	{
     		server.waiting.waitForGameStart();
@@ -60,7 +61,7 @@ public class MyServer {
 		game.startGame();
 		//server.giveMessageToAllUsers(new Message("PoczatekGry"));
     }
-    public int askQuestionInt(int indexOfUser, String question, int max, int min){
+    public int askAboutPlayersNumber(int indexOfUser, String question, int max, int min){
     	MessageInterface message = 
     			new MessageDecoratorAskPlayersNumber(new Message(question));
     	users.get(0).giveMessage(message);

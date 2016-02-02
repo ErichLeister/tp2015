@@ -1,5 +1,7 @@
 package myClientServer;
 
+import java.io.Serializable;
+
 public abstract class MessageDecorator implements MessageInterface {
 
 	protected Client client;
