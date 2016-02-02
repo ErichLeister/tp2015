@@ -4,10 +4,10 @@ import myClientServer.Answer;
 import myClientServer.Message;
 import myClientServer.RealUser;
 
-public class Player {
+public class PlayerServer {
 	RealUser user;
 	public String a = "example user message";
-	public Player(RealUser user){
+	public PlayerServer(RealUser user){
 		this.user = user;
 	}
 	public void sendMessage(MessageInterface message){

@@ -8,7 +8,7 @@ public class ClientPlayer implements Serializable {
 	public int cash;
 	public int bet;
 	public boolean bigBlind;
-	ClientPlayer(String name, int cash){
+	public ClientPlayer(String name, int cash){
 		this.name = name;
 		this.cash = cash;
 		state = "Initial State";

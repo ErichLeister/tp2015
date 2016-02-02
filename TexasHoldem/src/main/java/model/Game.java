@@ -4,6 +4,12 @@ import exceptions.InvalidMoveException;
 import exceptions.NoPlayersException;
 import exceptions.NotEnoughCardsException;
 import exceptions.NotPositiveAmountException;
+import myClientServer.ClientPlayer;
+import myClientServer.Message;
+import myClientServer.MessageDecoratorAddPlayer;
+import myClientServer.MessageInterface;
+import myClientServer.PlayerServer;
+import myClientServer.RealUser;
 import playerstate.AllInState;
 import playerstate.BigBlindState;
 import playerstate.EqualToMaxBetState;
@@ -32,9 +38,8 @@ public class Game {
   private Map<Player, Integer> playerAllInBet;
   private int currentIndex;
   
-  public Game(List<Player> players, int initialChipsPerPlayer, int smallBlindAmount, int bigBlindAmount) {
+  public Game(List<RealUser> users, int initialChipsPerPlayer, int smallBlindAmount, int bigBlindAmount) {
     this.commonCards = new ArrayList<Card>();
-    this.players = players;
     this.initialChipsPerPlayer = initialChipsPerPlayer;
     this.deck = new Deck();
     this.dealerButton = null;
@@ -43,6 +48,14 @@ public class Game {
     this.bigBlindAmount = bigBlindAmount;
     playerAllInBet = new HashMap<Player, Integer>();
     this.currentIndex = 0;
+    
+    players = new ArrayList<Player>();
+    
+    //System.out.println(users.size());
+    
+    for(RealUser user : users){
+      players.add(new Player("test",user));
+    }
   }
   
   private void setDealerButton() {
@@ -235,9 +248,7 @@ public class Game {
     
     for(Player player : players) {
       if (! player.getPlayerStateBehavior().getClass().equals(new FoldState().getClass())) {
-        System.out.println(player.getPlayerStateBehavior());
         activePlayers++;
-        System.out.println(activePlayers);
       }
     }
     return (activePlayers == 1);
@@ -278,16 +289,27 @@ public class Game {
   
   public void startGame() {
     this.prepareGame();
-    int index;
+    
     int roundNumber;
+    
+    MessageInterface message = new Message();
+    
+    for(Player player : players){
+      ClientPlayer clientPlayer = new ClientPlayer(player.getName(),player.getChips());
+      message = new MessageDecoratorAddPlayer(clientPlayer, message);
+    }
+    
+    for(Player player : players){
+      player.sendMessage(message);
+    }
     
     while(true) {
       roundNumber = 0;
       while ((! this.isOnlyOnePlayerNonFold()) && (roundNumber < 4)) {
         
-        index = this.prepareRoundOfBetting(roundNumber);
+        currentIndex = this.prepareRoundOfBetting(roundNumber);
         while ((! this.isOnlyOnePlayerNonFold()) && (! areFixedPlayerStates())) {
-         players.get(index).sendMessage("bet");          
+          
         }
         roundNumber++;
       }

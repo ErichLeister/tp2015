@@ -2,6 +2,7 @@ package model;
 
 import myClientServer.Answer;
 import myClientServer.Message;
+import myClientServer.MessageInterface;
 import myClientServer.RealUser;
 import playerstate.PlayerState;
 import playerstate.PlayerStateBehavior;
@@ -33,44 +34,44 @@ public class Player implements PlayerObserver, PlayerObservable {
   public String toString() {
     return this.name;
   }
-  
-  public void sendMessage(String msg) {
-    user.giveMessage(new Message(msg));
+
+  public void sendMessage(MessageInterface message){
+    user.giveMessage(message);
   }
-  
-  public Answer getAnswer() {
+
+  /*public Answer getAnswer() {
     return user.getAnswer(10);
-  }
-  
+  }*/
+
   public List<Card> getCards() {
-    
+
     return this.cards;
   }
-  
+
   public void setCards(List<Card> cards) {
     this.cards = cards;
   }
-  
+
   public String getName() {
     return this.name;
   }
-  
+
   public int getChips() {
     return this.chips;
   }
-  
+
   public void setChips(int chips) {
     this.chips = chips;
   }
-  
+
   public void addChips(int chips) {
     this.chips = this.chips + chips;
   }
-  
+
   public void withdrawChips(int chips) {
     this.chips = this.chips - chips;
   }
-  
+
   public void addCards(List<Card> cards) {
     this.cards.addAll(cards);
   }
@@ -78,7 +79,7 @@ public class Player implements PlayerObserver, PlayerObservable {
   public void setPlayerStateBehavior(PlayerStateBehavior playerStateBehavior) {
     this.playerStateBehavior = playerStateBehavior;
   }
-  
+
   public PlayerStateBehavior getPlayerStateBehavior() {
     return this.playerStateBehavior;
   }
@@ -114,6 +115,53 @@ public class Player implements PlayerObserver, PlayerObservable {
   @Override
   public void sendUpdate(Message msg) {
     // TODO Auto-generated method stub
-    
+
+  }
+  public int getBet(){
+    Answer answer = user.getAnswer(0);
+    int bet = -1;
+    bet = answer.getMessageInt();
+    return bet;
+  }
+  public int getPlayDecision(){
+    Answer answer = user.getAnswer(0);
+    int intOption = -1;
+    String stringOption = answer.getMessageString();
+    stringOption.trim();
+    stringOption.toLowerCase();
+
+    if(stringOption.equals("call"))
+    {
+      intOption = 1;
+    }
+    else if(stringOption.equals("raise"))
+    {
+      intOption = 2;
+    }
+    else if(stringOption.equals("allin"))
+    {
+      intOption = 3;
+    }
+    else if(stringOption.equals("all in"))
+    {
+      intOption = 3;
+    }
+    else if(stringOption.equals("all-in"))
+    {
+      intOption = 3;
+    }
+    else if(stringOption.equals("check"))
+    {
+      intOption = 4;
+    }
+    else if(stringOption.equals("bet"))
+    {
+      intOption = 5;
+    }
+    else if(stringOption.equals("fold"))
+    {
+      intOption = 6;
+    }
+    return intOption;
   }
 }

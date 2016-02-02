@@ -4,15 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class Game {
-	private List<Player> players;
+public class GameServer {
+	private List<PlayerServer> players;
 
-	public Game(List<RealUser> users){
+	public GameServer(List<RealUser> users){
 		System.out.println("gras rozpoczeta");
-		players = new ArrayList<Player>();
+		players = new ArrayList<PlayerServer>();
 		int i = 1;
 		for(RealUser user : users){
-			players.add(new Player(user));
+			players.add(new PlayerServer(user));
 			i++;
 		}
 	}
@@ -24,16 +24,16 @@ public class Game {
 
 		MessageInterface message = new Message();
 		
-		for(Player player : players){
+		for(PlayerServer player : players){
 			ClientPlayer clientPlayer = new ClientPlayer("test",1);
 			message = new MessageDecoratorAddPlayer(clientPlayer, message);
 		}
 		
-		for(Player player : players){
+		for(PlayerServer player : players){
 			player.sendMessage(message);
 		}
 		while(1==1){
-			for(Player player : players){
+			for(PlayerServer player : players){
 				message = new Message();
 				message = new MessageDecoratorAskPlayDecision(message);
 				player.sendMessage(message);

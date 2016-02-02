@@ -9,6 +9,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+import model.Game;
+
 public class MyServer {
 
 	private List<RealUser> users;
@@ -57,7 +59,7 @@ public class MyServer {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}*/
-		Game game = new Game(server.users);
+		Game game = new Game(server.users, 1000, 10, 20);
 		game.startGame();
 		//server.giveMessageToAllUsers(new Message("PoczatekGry"));
     }
@@ -72,7 +74,6 @@ public class MyServer {
     	return answer;
     }
     public void addUser(Socket socket){
-    	//System.out.println("testU");
 
 		try {
 	    	RealUser user = new RealUser(socket,this);
