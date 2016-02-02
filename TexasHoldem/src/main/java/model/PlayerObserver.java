@@ -1,5 +1,8 @@
 package model;
 
+import myClientServer.Message;
+
 public interface PlayerObserver {
-  public void update(String betType);
+  public void updateStateBehavior(String betType);
+  public void sendUpdate(Message msg);
 }

@@ -1,5 +1,9 @@
 package myClientServer;
 
+import myClientServer.Answer;
+import myClientServer.Message;
+import myClientServer.RealUser;
+
 public class Player {
 	RealUser user;
 	public String a = "example user message";

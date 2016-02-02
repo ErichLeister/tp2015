@@ -50,7 +50,7 @@ public class LessThanMaxBetState implements PlayerStateBehavior {
 
   @Override
   public PlayerStateBehavior bigBlind() throws InvalidMoveException {
-    throw new InvalidMoveException();
+    return PlayerState.BIG_BLIND.getStateBehavior();
   }
 
   @Override

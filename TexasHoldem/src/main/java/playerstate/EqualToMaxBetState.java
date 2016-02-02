@@ -56,7 +56,7 @@ public class EqualToMaxBetState implements PlayerStateBehavior {
 
   @Override
   public PlayerStateBehavior somebodySmallBlind() {
-    return this;
+    return PlayerState.LESS_THAN_MAX_BET.getStateBehavior();
   }
 
   @Override
