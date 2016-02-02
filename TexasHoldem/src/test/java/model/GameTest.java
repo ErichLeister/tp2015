@@ -355,7 +355,7 @@ public class GameTest {
     Method method = (Game.class).getDeclaredMethod("isOnlyOnePlayerNonFold");
     method.setAccessible(true);
 
-    p1.setPlayerStateBehavior(PlayerState.LESS_THAN_MAX_BET.getStateBehavior());
+    p1.setPlayerStateBehavior(PlayerState.BIG_BLIND.getStateBehavior());
     p2.setPlayerStateBehavior(PlayerState.EQUAL_TO_MAX_BET.getStateBehavior());
     p3.setPlayerStateBehavior(PlayerState.FOLD.getStateBehavior());
 
@@ -374,6 +374,40 @@ public class GameTest {
     p1.setPlayerStateBehavior(PlayerState.FOLD.getStateBehavior());
     p2.setPlayerStateBehavior(PlayerState.ALL_IN.getStateBehavior());
     p3.setPlayerStateBehavior(PlayerState.FOLD.getStateBehavior());
+    
+    if (! (boolean)method.invoke(game)) {
+      fail();
+    }  
+  }
+  
+  @Test
+  public void testArePlayersReadyToNextRound_shouldReturnTrue() throws NoSuchMethodException,
+  IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
+    Method method = (Game.class).getDeclaredMethod("arePlayersReadyToNextRound");
+    method.setAccessible(true);
+
+    p1.setPlayerStateBehavior(PlayerState.FOLD.getStateBehavior());
+    p2.setPlayerStateBehavior(PlayerState.ALL_IN.getStateBehavior());
+    p3.setPlayerStateBehavior(PlayerState.EQUAL_TO_MAX_BET.getStateBehavior());
+
+    System.out.println((boolean)method.invoke(game));
+    
+    if (! (boolean)method.invoke(game)) {
+      fail();
+    }  
+  }
+  
+  @Test
+  public void testArePlayersReadyToNextRound_shouldReturnFalse() throws NoSuchMethodException,
+  IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
+    Method method = (Game.class).getDeclaredMethod("arePlayersReadyToNextRound");
+    method.setAccessible(true);
+
+    p1.setPlayerStateBehavior(PlayerState.FOLD.getStateBehavior());
+    p2.setPlayerStateBehavior(PlayerState.ALL_IN.getStateBehavior());
+    p3.setPlayerStateBehavior(PlayerState.BIG_BLIND.getStateBehavior());
 
     System.out.println((boolean)method.invoke(game));
     

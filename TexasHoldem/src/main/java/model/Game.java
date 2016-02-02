@@ -218,13 +218,17 @@ public class Game {
   private boolean arePlayersReadyToNextRound() {
     boolean areReady = true;
     
+    if (this.isOnlyOnePlayerNonFold())
+      return true;
+    
     Iterator<Player> iterator = players.iterator();
     
     while (iterator.hasNext() && (! areReady)) {
       Player player = iterator.next();
-      if (player.getPlayerStateBehavior().equals(new FoldState())
-          || player.getPlayerStateBehavior().equals(new AllInState())
-          || player.getPlayerStateBehavior().equals(new EqualToMaxBetState()))
+      if (player.getPlayerStateBehavior().getClass().equals(new FoldState().getClass())
+          || player.getPlayerStateBehavior().getClass().equals(new AllInState().getClass())
+          || player.getPlayerStateBehavior().getClass().equals(new EqualToMaxBetState().getClass())
+          || player.getPlayerStateBehavior().getClass().equals(new BigBlindState().getClass()))
         areReady = false;
     }
     return areReady;
@@ -279,19 +283,20 @@ public class Game {
   public void startGame() {
     this.prepareGame();
     int index;
-    int roundNumber;
-    
+    int roundNumber =0;
+
     while(true) {
       roundNumber = 0;
       while ((! this.isOnlyOnePlayerNonFold()) && (roundNumber < 4)) {
-        
-        index = this.prepareRoundOfBetting(roundNumber);
-        while ((! this.isOnlyOnePlayerNonFold()) && (! areFixedPlayerStates())) {
-         players.get(index).sendMessage("bet");          
+
+        this.currentIndex = this.prepareRoundOfBetting(roundNumber);
+        while ((! this.arePlayersReadyToNextRound())) {
+          players.get(this.currentIndex).sendMessage("bet");
+          
+          this.moveCurrentIndexToActivePlayer();
         }
         roundNumber++;
       }
-      
       this.moveDealerButton();
     }
   }
