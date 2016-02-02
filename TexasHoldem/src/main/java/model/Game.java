@@ -282,8 +282,7 @@ public class Game {
   
   public void startGame() {
     this.prepareGame();
-    int index;
-    int roundNumber =0;
+    int roundNumber = 0;
 
     while(true) {
       roundNumber = 0;
@@ -291,7 +290,7 @@ public class Game {
 
         this.currentIndex = this.prepareRoundOfBetting(roundNumber);
         while ((! this.arePlayersReadyToNextRound())) {
-          players.get(this.currentIndex).sendMessage("bet");
+          
           
           this.moveCurrentIndexToActivePlayer();
         }
