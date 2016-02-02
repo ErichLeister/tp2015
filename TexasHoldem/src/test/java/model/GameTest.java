@@ -348,4 +348,38 @@ public class GameTest {
     }
   }
   
+  @Test
+  public void testIsActiveOnlyOnePlayer_shouldReturnFalse() throws NoSuchMethodException,
+  IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
+    Method method = (Game.class).getDeclaredMethod("isOnlyOnePlayerNonFold");
+    method.setAccessible(true);
+
+    p1.setPlayerStateBehavior(PlayerState.LESS_THAN_MAX_BET.getStateBehavior());
+    p2.setPlayerStateBehavior(PlayerState.EQUAL_TO_MAX_BET.getStateBehavior());
+    p3.setPlayerStateBehavior(PlayerState.FOLD.getStateBehavior());
+
+    if ((boolean)method.invoke(game)) {
+      fail();
+    }  
+  }
+  
+  @Test
+  public void testIsActiveOnlyOnePlayer_shouldReturnTrue() throws NoSuchMethodException,
+  IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
+    Method method = (Game.class).getDeclaredMethod("isOnlyOnePlayerNonFold");
+    method.setAccessible(true);
+
+    p1.setPlayerStateBehavior(PlayerState.FOLD.getStateBehavior());
+    p2.setPlayerStateBehavior(PlayerState.ALL_IN.getStateBehavior());
+    p3.setPlayerStateBehavior(PlayerState.FOLD.getStateBehavior());
+
+    System.out.println((boolean)method.invoke(game));
+    
+    if (! (boolean)method.invoke(game)) {
+      fail();
+    }  
+  }
+  
 }

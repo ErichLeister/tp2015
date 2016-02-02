@@ -63,6 +63,10 @@ public class Player implements PlayerObserver, PlayerObservable {
     this.chips = chips;
   }
   
+  public void addChips(int chips) {
+    this.chips = this.chips + chips;
+  }
+  
   public void withdrawChips(int chips) {
     this.chips = this.chips - chips;
   }
@@ -92,12 +96,12 @@ public class Player implements PlayerObserver, PlayerObservable {
   @Override
   public void notifyObservers(String betType) {
     for (Player observer : observers) {
-      observer.update(betType);
+      observer.updateStateBehavior(betType);
     }
   }
 
   @Override
-  public void update(String betType) {
+  public void updateStateBehavior(String betType) {
     if (betType.equals("rise")) {
       this.playerStateBehavior = this.getPlayerStateBehavior().somebodyRaise();
     } else if (betType.equals("smallBlind")) {
@@ -105,5 +109,11 @@ public class Player implements PlayerObserver, PlayerObservable {
     } else if (betType.equals("bigBlind")) {
       this.playerStateBehavior = this.getPlayerStateBehavior().somebodyBigBlind();
     }
+  }
+
+  @Override
+  public void sendUpdate(Message msg) {
+    // TODO Auto-generated method stub
+    
   }
 }

@@ -1,14 +1,20 @@
 package model;
 
 import exceptions.InvalidMoveException;
+import exceptions.NoPlayersException;
 import exceptions.NotEnoughCardsException;
 import exceptions.NotPositiveAmountException;
 import playerstate.AllInState;
+import playerstate.BigBlindState;
+import playerstate.EqualToMaxBetState;
 import playerstate.FoldState;
+import playerstate.InitState;
+import playerstate.LessThanMaxBetState;
 import playerstate.PlayerState;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -24,6 +30,7 @@ public class Game {
   private int smallBlindAmount;
   private int bigBlindAmount;
   private Map<Player, Integer> playerAllInBet;
+  private int currentIndex;
   
   public Game(List<Player> players, int initialChipsPerPlayer, int smallBlindAmount, int bigBlindAmount) {
     this.commonCards = new ArrayList<Card>();
@@ -35,30 +42,16 @@ public class Game {
     this.smallBlindAmount = smallBlindAmount;
     this.bigBlindAmount = bigBlindAmount;
     playerAllInBet = new HashMap<Player, Integer>();
-  }
-  
-  // Regroup the list of players, so a player with the big blind is on the last position in the list
-  public void regroupPlayersList() {
-    if (players.size() == 2) {
-      if (findIndexOfDealerButton() == 1) {
-        players.add(players.remove(0));
-      }
-    } else if (players.size() == 1) {
-    } else {
-      int index = findIndexOfDealerButton();
-      int indexOfBigBlind = (index + 2) % players.size();
-      
-      
-      while ((players.size() - indexOfBigBlind) > 0) {
-        players.add(players.get(0));
-      }
-    }
-    
+    this.currentIndex = 0;
   }
   
   private void setDealerButton() {
     Random rand = new Random();
     this.dealerButton = players.get(rand.nextInt(players.size()));
+  }
+  
+  private void moveDealerButton() {
+    this.dealerButton = players.get(this.findIndexOfNextActivePlayer(this.getNextIndex(players.indexOf(dealerButton))));
   }
   
   private int findIndexOfDealerButton() {
@@ -76,6 +69,16 @@ public class Game {
   
   private int getNextIndex(int index) {
     return (index + 1) % players.size();
+  }
+  
+  private void moveCurrentIndex() {
+    this.currentIndex = (this.currentIndex + 1) % players.size();
+  } 
+  
+  private void moveCurrentIndexToActivePlayer() {
+    do {
+      this.moveCurrentIndex();
+    } while (this.isFoldOrAllin(players.get(this.currentIndex)));
   }
   
   private int findIndexOfSmallBlind() {
@@ -212,7 +215,84 @@ public class Game {
     }
   }
   
-  public void startGame() {
+  private boolean arePlayersReadyToNextRound() {
+    boolean areReady = true;
     
+    Iterator<Player> iterator = players.iterator();
+    
+    while (iterator.hasNext() && (! areReady)) {
+      Player player = iterator.next();
+      if (player.getPlayerStateBehavior().equals(new FoldState())
+          || player.getPlayerStateBehavior().equals(new AllInState())
+          || player.getPlayerStateBehavior().equals(new EqualToMaxBetState()))
+        areReady = false;
+    }
+    return areReady;
+  }
+  
+  private boolean isOnlyOnePlayerNonFold() {
+    int activePlayers = 0;
+    
+    for(Player player : players) {
+      if (! player.getPlayerStateBehavior().getClass().equals(new FoldState().getClass())) {
+        System.out.println(player.getPlayerStateBehavior());
+        activePlayers++;
+        System.out.println(activePlayers);
+      }
+    }
+    return (activePlayers == 1);
+  }
+  
+  private boolean areFixedPlayerStates() {
+    boolean outcome = true;
+    
+    for (Player player : players) {
+      if (player.getPlayerStateBehavior().equals(new InitState())
+          || player.getPlayerStateBehavior().equals(new LessThanMaxBetState())
+          || player.getPlayerStateBehavior().equals(new BigBlindState())) {
+        outcome = true;
+        break;
+      }
+    }
+    return outcome;
+  }
+  
+  private void summaryOfRound() throws NoPlayersException {
+    Dealer dealer = new Dealer(commonCards, players);
+    
+    Map<Integer, List<Player>> chartOfWinners = dealer.getChartOfWinners();
+    
+    int place = 1;
+    List<Player> winners = chartOfWinners.get(place);
+      for(Player player : winners) {
+        player.addChips((int) Math.floor(pot / chartOfWinners.get(place).size()));
+      }
+      this.commonCards = new ArrayList<Card>();
+      
+      for(Player player : players) {
+        player.setCards(new ArrayList<Card>());
+        player.setChips(this.initialChipsPerPlayer);
+        player.setPlayerStateBehavior(PlayerState.INIT.getStateBehavior());
+      }
+  }
+  
+  public void startGame() {
+    this.prepareGame();
+    int index;
+    int roundNumber;
+    
+    while(true) {
+      roundNumber = 0;
+      while ((! this.isOnlyOnePlayerNonFold()) && (roundNumber < 4)) {
+        
+        index = this.prepareRoundOfBetting(roundNumber);
+        while ((! this.isOnlyOnePlayerNonFold()) && (! areFixedPlayerStates())) {
+         players.get(index).sendMessage("bet");          
+        }
+        roundNumber++;
+      }
+      
+      this.moveDealerButton();
+    }
   }
 }
