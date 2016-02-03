@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import model.Game;
@@ -61,12 +62,15 @@ public class MyServer {
 			e.printStackTrace();
 		}*/
     	ArrayList<Player> players = new ArrayList<Player>();
-    	for(RealUser user : server.users) {
-    	  players.add(new Player("test",user));
+    	Iterator<RealUser> it = server.users.iterator();
+    	
+    	int i = 0;
+    	while(it.hasNext()) {
+    	  players.add(new Player("test",it.next()));
     	}
     	
-    	System.out.println(server.users);
-    	System.out.println(players);
+//    	System.out.println(server.users);
+//    	System.out.println(players);
 		Game game = new Game(players, 1000, 10, 20);
 		game.startGame();
 		//server.giveMessageToAllUsers(new Message("PoczatekGry"));

@@ -20,7 +20,6 @@ import playerstate.FoldState;
 import playerstate.InitState;
 import playerstate.LessThanMaxBetState;
 import playerstate.PlayerState;
-import playerstate.PlayerStateBehavior;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

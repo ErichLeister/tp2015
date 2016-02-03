@@ -27,9 +27,9 @@ public class Player implements PlayerObserver, PlayerObservable {
     this.observers = new ArrayList<Player>();
   }
 
-  public boolean equals(Object player) {
-    return (this.getName().equals(((Player)player).getName()));
-  }
+//  public boolean equals(Object player) {
+//    return (this.getName().equals(((Player)player).getName()));
+//  }
 
   public String toString() {
     return this.name;
@@ -102,7 +102,7 @@ public class Player implements PlayerObserver, PlayerObservable {
     if (betType.equals("rise")) {
       this.playerStateBehavior = this.getPlayerStateBehavior().somebodyRaise();
     } else if (betType.equals("smallBlind")) {
-      this.playerStateBehavior = this.getPlayerStateBehavior().somebodySmallBlind();
+      this.playerStateBehavior = this.playerStateBehavior.somebodySmallBlind();
     } else if (betType.equals("bigBlind")) {
       this.playerStateBehavior = this.getPlayerStateBehavior().somebodyBigBlind();
     }

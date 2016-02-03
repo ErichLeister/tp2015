@@ -9,6 +9,8 @@ import myClientServer.Message;
 import myClientServer.MessageDecoratorAddPlayer;
 import myClientServer.MessageDecoratorAskPlayDecision;
 import myClientServer.MessageDecoratorAskPlayerBet;
+import myClientServer.MessageDecoratorSetBet;
+import myClientServer.MessageDecoratorSetCash;
 import myClientServer.MessageInterface;
 import playerstate.AllInState;
 import playerstate.BigBlindState;
@@ -128,10 +130,11 @@ public class Game {
     deck.shuffleCards();
     
     this.setDealerButton();
-    
+    System.out.println("prepare game");
     for (Player player : players) {
       player.setChips(initialChipsPerPlayer);  
       for (Player otherPlayer : players) {
+        System.out.println("player: " + player + ",otherPlayer: " + otherPlayer);
         if (! player.equals(otherPlayer)) {
           player.addObserver(otherPlayer);
         }
@@ -148,23 +151,32 @@ public class Game {
   private void takeSmallBlind() {
     int index = this.findIndexOfSmallBlind();
     Player player = players.get(index);
-
+    
+    for (Player player1 : players) {
+      System.out.println(player1.getPlayerStateBehavior());
+    }
+    
     if (player.getChips() <= this.smallBlindAmount) {
       this.addPlayerAllInChips(player, 2 * player.getChips());
       player.setPlayerStateBehavior(player.getPlayerStateBehavior().allin());
       player.notifyObservers("smallBlind");
-      this.pot = player.getChips();
+      this.currentPot = player.getChips();
       player.setChips(0);
       
     } else {
       try {
         player.setPlayerStateBehavior(player.getPlayerStateBehavior().smallBlind());
       } catch (InvalidMoveException e) {
+        System.out.println("blaad");
         e.printStackTrace();
       }
       player.notifyObservers("smallBlind");
-      player.setChips(player.getChips() - smallBlindAmount);
-      this.pot = this.smallBlindAmount;
+      player.withdrawChips(smallBlindAmount);
+      this.currentPot = this.smallBlindAmount;
+      
+      for (Player player1 : players) {
+        System.out.println(player1.getPlayerStateBehavior());
+      }
       
     }
   }
@@ -178,8 +190,20 @@ public class Game {
       if (player.getChips() > this.pot) {
         player.notifyObservers("rise");
       }
-      this.pot = this.pot + player.getChips();
+      this.currentPot = this.currentPot + player.getChips();
+      
+      MessageInterface msg = new MessageDecoratorSetBet(this.currentPot, player.getBet(), new Message());
+      for (Player p : players) {
+        p.sendMessage(msg);
+      }
+      
       player.setChips(0);
+      
+      MessageInterface msg1 = new MessageDecoratorSetCash(this.currentPot, this.currentPot, new Message());
+      for (Player p : players) {
+        p.sendMessage(msg1);
+      }
+      
       player.setPlayerStateBehavior(player.getPlayerStateBehavior().allin());
     } else {
       try {
@@ -188,9 +212,10 @@ public class Game {
       } catch (InvalidMoveException e) {
         e.printStackTrace();
       }
+      //System.out.println(player.observers);
       player.notifyObservers("bigBlind");
       player.withdrawChips(bigBlindAmount);
-      this.pot = this.pot + bigBlindAmount;
+      this.currentPot = this.currentPot + bigBlindAmount;
     }
   }
   
@@ -439,22 +464,28 @@ public class Game {
 
     MessageInterface message = new Message();
 
-    for(Player player : players){
+    for (Player player : players) {
       ClientPlayer clientPlayer = new ClientPlayer(player.getName(),player.getChips());
       message = new MessageDecoratorAddPlayer(clientPlayer, message);
 
-      while(true) {
+      while (true) {
         roundNumber = 0;
         while ((! this.isOnlyOnePlayerNonFold()) && (roundNumber < 4)) {
 
           this.currentIndex = this.prepareRoundOfBetting(roundNumber);
-          while ((! this.arePlayersReadyToNextRound())) {
+          while (true/*(! this.arePlayersReadyToNextRound())*/) {
+            System.out.println("w licytacji");
             this.playerMove(players.get(this.currentIndex));
 
             this.moveCurrentIndexToActivePlayer();
           }
-          this.summaryOfBettingRound();
-          roundNumber++;
+          //this.summaryOfBettingRound();
+          //roundNumber++;
+        }
+        try {
+          this.summaryOfRound();
+        } catch (NoPlayersException e) {
+          e.printStackTrace();
         }
         this.moveDealerButton();
       }
