@@ -1,6 +1,8 @@
 package model;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 
@@ -14,9 +16,11 @@ import org.mockito.Mockito;
 import playerstate.AllInState;
 import playerstate.BigBlindState;
 import playerstate.EqualToMaxBetState;
+import playerstate.FoldState;
 import playerstate.InitState;
 import playerstate.LessThanMaxBetState;
 import playerstate.PlayerState;
+import playerstate.PlayerStateBehavior;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -28,6 +32,10 @@ import java.util.Map;
 public class GameTest {
   Game game;
   
+  RealUser u1;
+  RealUser u2;
+  RealUser u3;
+  
   Player p1;
   Player p2;
   Player p3;
@@ -38,10 +46,14 @@ public class GameTest {
   List<Player> players;
   
   @Before
-  public void setUp() {
-    p1 = new Player("p1", Mockito.mock(RealUser.class));
-    p2 = new Player("p2", Mockito.mock(RealUser.class));
-    p3 = new Player("p3", Mockito.mock(RealUser.class));
+  public void setUp() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+    u1 = Mockito.mock(RealUser.class);
+    u2 = Mockito.mock(RealUser.class);
+    u3 = Mockito.mock(RealUser.class);
+    
+    p1 = Mockito.spy(new Player("p1", u1));
+    p2 = Mockito.spy(new Player("p2", u2));
+    p3 = Mockito.spy(new Player("p3", u3));
     
     initialChipsPerPlayer = 100;
     smallBlindAmount = 5;
@@ -382,4 +394,334 @@ public class GameTest {
     }  
   }
   
+  // I did not test if the playersBet for the p2 has properly changed.
+  @Test
+  public void testRaiseMove_shouldReturnTrue() throws NoSuchFieldException, SecurityException,
+  IllegalArgumentException, IllegalAccessException, NoSuchMethodException,
+  InvocationTargetException {
+
+    p1.setPlayerStateBehavior(PlayerState.BIG_BLIND.getStateBehavior());
+    p2.setPlayerStateBehavior(PlayerState.LESS_THAN_MAX_BET.getStateBehavior());
+    p3.setPlayerStateBehavior(PlayerState.LESS_THAN_MAX_BET.getStateBehavior());
+
+    Field currentPot = (Game.class).getDeclaredField("currentPot");
+    currentPot.setAccessible(true);
+    currentPot.set(game, 10);
+
+    Method raiseMove = (Game.class).getDeclaredMethod("raiseMove", Player.class);
+    raiseMove.setAccessible(true);
+
+    Mockito.doReturn(20).when(p2).getBet();
+
+    boolean isValid = (boolean) raiseMove.invoke(game, p2);
+
+    if (! p1.getPlayerStateBehavior().getClass().equals(new BigBlindState().getClass()))
+      fail();
+
+    if (! p2.getPlayerStateBehavior().getClass().equals(new EqualToMaxBetState().getClass()))
+      fail();
+
+    if (! p3.getPlayerStateBehavior().getClass().equals(new LessThanMaxBetState().getClass()))
+      fail();
+
+    assertEquals(currentPot.get(game), 30);
+
+    assertEquals(p1.getChips(), 100);
+    assertEquals(p2.getChips(), 80);
+    assertEquals(p3.getChips(), 100);
+    assertTrue(isValid);
+  }
+
+  // I did not test if the playersBet for the p2 has properly changed.
+  @Test
+  public void testRaiseMove_shouldReturnFalse_NotEnoughChips() throws NoSuchFieldException,
+  SecurityException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException,
+  InvocationTargetException {
+
+    p1.setPlayerStateBehavior(PlayerState.BIG_BLIND.getStateBehavior());
+    p2.setPlayerStateBehavior(PlayerState.LESS_THAN_MAX_BET.getStateBehavior());
+    p3.setPlayerStateBehavior(PlayerState.LESS_THAN_MAX_BET.getStateBehavior());
+
+    Field currentPot = (Game.class).getDeclaredField("currentPot");
+    currentPot.setAccessible(true);
+    currentPot.set(game, 20);
+
+    Method raiseMove = (Game.class).getDeclaredMethod("raiseMove", Player.class);
+    raiseMove.setAccessible(true);
+
+    Mockito.doReturn(90).when(p2).getBet();
+
+    boolean isValid = (boolean) raiseMove.invoke(game, p2);
+
+    if (! p1.getPlayerStateBehavior().getClass().equals(new BigBlindState().getClass()))
+      fail();
+
+    if (! p2.getPlayerStateBehavior().getClass().equals(new LessThanMaxBetState().getClass()))
+      fail();
+
+    if (! p3.getPlayerStateBehavior().getClass().equals(new LessThanMaxBetState().getClass()))
+      fail();
+
+    assertEquals(currentPot.get(game), 20);
+
+    assertEquals(p1.getChips(), 100);
+    assertEquals(p2.getChips(), 100);
+    assertEquals(p3.getChips(), 100);
+    assertFalse(isValid);
+  }
+
+  // I did not test if the playersBet for the p2 has properly changed.
+  @Test
+  public void testCallMove_shouldReturnTrue() throws NoSuchFieldException, SecurityException,
+  IllegalArgumentException, IllegalAccessException, NoSuchMethodException,
+  InvocationTargetException {
+
+    p1.setPlayerStateBehavior(PlayerState.BIG_BLIND.getStateBehavior());
+    p2.setPlayerStateBehavior(PlayerState.EQUAL_TO_MAX_BET.getStateBehavior());
+    p3.setPlayerStateBehavior(PlayerState.EQUAL_TO_MAX_BET.getStateBehavior());
+
+    Field currentPot = (Game.class).getDeclaredField("currentPot");
+    currentPot.setAccessible(true);
+    currentPot.set(game, 40);
+
+    Method move = (Game.class).getDeclaredMethod("callMove", Player.class);
+    move.setAccessible(true);
+
+    boolean isValid = (boolean) move.invoke(game, p1);
+
+    if (! p1.getPlayerStateBehavior().getClass().equals(new EqualToMaxBetState().getClass()))
+      fail();
+
+    if (! p2.getPlayerStateBehavior().getClass().equals(new EqualToMaxBetState().getClass()))
+      fail();
+
+    if (! p3.getPlayerStateBehavior().getClass().equals(new EqualToMaxBetState().getClass()))
+      fail();
+
+    assertEquals(currentPot.get(game), 80);
+
+    assertEquals(p1.getChips(), 60);
+    assertEquals(p2.getChips(), 100);
+    assertEquals(p3.getChips(), 100);
+    
+    assertTrue(isValid);
+
+  }
+
+  // I did not test if the playersBet for the p2 has properly changed.
+  @Test
+  public void testCallMove_shouldReturnFalse_NotEnoughChips() throws NoSuchFieldException,
+  SecurityException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException,
+  InvocationTargetException {
+
+    p1.setPlayerStateBehavior(PlayerState.BIG_BLIND.getStateBehavior());
+    p2.setPlayerStateBehavior(PlayerState.LESS_THAN_MAX_BET.getStateBehavior());
+    p3.setPlayerStateBehavior(PlayerState.LESS_THAN_MAX_BET.getStateBehavior());
+
+    Field currentPot = (Game.class).getDeclaredField("currentPot");
+    currentPot.setAccessible(true);
+    currentPot.set(game, 110);
+
+    Method move = (Game.class).getDeclaredMethod("callMove", Player.class);
+    move.setAccessible(true);
+
+
+    boolean isValid = (boolean) move.invoke(game, p2);
+
+    if (! p1.getPlayerStateBehavior().getClass().equals(new BigBlindState().getClass()))
+      fail();
+
+    if (! p2.getPlayerStateBehavior().getClass().equals(new LessThanMaxBetState().getClass()))
+      fail();
+
+    if (! p3.getPlayerStateBehavior().getClass().equals(new LessThanMaxBetState().getClass()))
+      fail();
+
+    assertEquals(currentPot.get(game), 110);
+
+    assertEquals(p1.getChips(), 100);
+    assertEquals(p2.getChips(), 100);
+    assertEquals(p3.getChips(), 100);
+    
+    assertFalse(isValid);
+  }
+
+  // I did not test if the playersBet for the p2 has properly changed.
+  @Test
+  public void testFoldMove() throws NoSuchFieldException,
+  SecurityException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException,
+  InvocationTargetException {
+
+    p1.setPlayerStateBehavior(PlayerState.EQUAL_TO_MAX_BET.getStateBehavior());
+    p2.setPlayerStateBehavior(PlayerState.LESS_THAN_MAX_BET.getStateBehavior());
+    p3.setPlayerStateBehavior(PlayerState.LESS_THAN_MAX_BET.getStateBehavior());
+
+    Field currentPot = (Game.class).getDeclaredField("currentPot");
+    currentPot.setAccessible(true);
+    currentPot.set(game, 110);
+
+    Method move = (Game.class).getDeclaredMethod("foldMove", Player.class);
+    move.setAccessible(true);
+
+    move.invoke(game, p2);
+
+    if (! p1.getPlayerStateBehavior().getClass().equals(new EqualToMaxBetState().getClass()))
+      fail();
+
+    if (! p2.getPlayerStateBehavior().getClass().equals(new FoldState().getClass()))
+      fail();
+
+    if (! p3.getPlayerStateBehavior().getClass().equals(new LessThanMaxBetState().getClass()))
+      fail();
+
+    assertEquals(currentPot.get(game), 110);
+
+    assertEquals(p1.getChips(), 100);
+    assertEquals(p2.getChips(), 100);
+    assertEquals(p3.getChips(), 100);
+  }
+  
+  //I did not test if the playersBet for the p2 has properly changed.
+  @Test
+  public void testCheckMove_shouldReturnTrue() throws NoSuchFieldException,
+  SecurityException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException,
+  InvocationTargetException {
+
+    p1.setPlayerStateBehavior(PlayerState.EQUAL_TO_MAX_BET.getStateBehavior());
+    p2.setPlayerStateBehavior(PlayerState.INIT.getStateBehavior());
+    p3.setPlayerStateBehavior(PlayerState.EQUAL_TO_MAX_BET.getStateBehavior());
+
+    Field currentPot = (Game.class).getDeclaredField("currentPot");
+    currentPot.setAccessible(true);
+    currentPot.set(game, 0);
+
+    Method move = (Game.class).getDeclaredMethod("checkMove", Player.class);
+    move.setAccessible(true);
+
+    boolean outcome = (boolean) move.invoke(game, p2);
+
+    if (! p1.getPlayerStateBehavior().getClass().equals(new EqualToMaxBetState().getClass()))
+      fail();
+
+    if (! p2.getPlayerStateBehavior().getClass().equals(new EqualToMaxBetState().getClass()))
+      fail();
+
+    if (! p3.getPlayerStateBehavior().getClass().equals(new EqualToMaxBetState().getClass()))
+      fail();
+
+    assertEquals(currentPot.get(game), 0);
+
+    assertEquals(p1.getChips(), 100);
+    assertEquals(p2.getChips(), 100);
+    assertEquals(p3.getChips(), 100);
+    
+    assertTrue(outcome);
+  }
+  
+  //I did not test if the playersBet for the p2 has properly changed.
+  @Test
+  public void testCheckMove_shouldReturnFalse() throws NoSuchFieldException,
+  SecurityException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException,
+  InvocationTargetException {
+
+    p1.setPlayerStateBehavior(PlayerState.EQUAL_TO_MAX_BET.getStateBehavior());
+    p2.setPlayerStateBehavior(PlayerState.LESS_THAN_MAX_BET.getStateBehavior());
+    p3.setPlayerStateBehavior(PlayerState.LESS_THAN_MAX_BET.getStateBehavior());
+
+    Field currentPot = (Game.class).getDeclaredField("currentPot");
+    currentPot.setAccessible(true);
+    currentPot.set(game, 20);
+
+    Method move = (Game.class).getDeclaredMethod("checkMove", Player.class);
+    move.setAccessible(true);
+
+    boolean outcome = (boolean) move.invoke(game, p2);
+
+    if (! p1.getPlayerStateBehavior().getClass().equals(new EqualToMaxBetState().getClass()))
+      fail();
+
+    if (! p2.getPlayerStateBehavior().getClass().equals(new LessThanMaxBetState().getClass()))
+      fail();
+
+    if (! p3.getPlayerStateBehavior().getClass().equals(new LessThanMaxBetState().getClass()))
+      fail();
+
+    assertEquals(currentPot.get(game), 20);
+
+    assertEquals(p1.getChips(), 100);
+    assertEquals(p2.getChips(), 100);
+    assertEquals(p3.getChips(), 100);
+    
+    assertFalse(outcome);
+  }
+
+  //I did not test if the playersBet for the p2 has properly changed.
+  @Test
+  public void testAllInkMove_lessThanCurrentPot() throws NoSuchFieldException,
+  SecurityException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException,
+  InvocationTargetException {
+
+    p1.setPlayerStateBehavior(PlayerState.EQUAL_TO_MAX_BET.getStateBehavior());
+    p2.setPlayerStateBehavior(PlayerState.LESS_THAN_MAX_BET.getStateBehavior());
+    p3.setPlayerStateBehavior(PlayerState.LESS_THAN_MAX_BET.getStateBehavior());
+
+    Field currentPot = (Game.class).getDeclaredField("currentPot");
+    currentPot.setAccessible(true);
+    currentPot.set(game, 110);
+
+    Method move = (Game.class).getDeclaredMethod("allInMove", Player.class);
+    move.setAccessible(true);
+
+    move.invoke(game, p2);
+
+    if (! p1.getPlayerStateBehavior().getClass().equals(new EqualToMaxBetState().getClass()))
+      fail();
+
+    if (! p2.getPlayerStateBehavior().getClass().equals(new AllInState().getClass()))
+      fail();
+
+    if (! p3.getPlayerStateBehavior().getClass().equals(new LessThanMaxBetState().getClass()))
+      fail();
+
+    assertEquals(currentPot.get(game), 110);
+
+    assertEquals(p1.getChips(), 100);
+    assertEquals(p2.getChips(), 0);
+    assertEquals(p3.getChips(), 100);
+  }
+
+  //I did not test if the playersBet for the p2 has properly changed.
+  @Test
+  public void testAllInkMove_MoreThanCurrentPot() throws NoSuchFieldException,
+  SecurityException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException,
+  InvocationTargetException {
+
+    p1.setPlayerStateBehavior(PlayerState.EQUAL_TO_MAX_BET.getStateBehavior());
+    p2.setPlayerStateBehavior(PlayerState.LESS_THAN_MAX_BET.getStateBehavior());
+    p3.setPlayerStateBehavior(PlayerState.LESS_THAN_MAX_BET.getStateBehavior());
+
+    Field currentPot = (Game.class).getDeclaredField("currentPot");
+    currentPot.setAccessible(true);
+    currentPot.set(game, 30);
+
+    Method move = (Game.class).getDeclaredMethod("allInMove", Player.class);
+    move.setAccessible(true);
+
+    move.invoke(game, p2);
+
+    if (! p1.getPlayerStateBehavior().getClass().equals(new LessThanMaxBetState().getClass()))
+      fail();
+
+    if (! p2.getPlayerStateBehavior().getClass().equals(new AllInState().getClass()))
+      fail();
+
+    if (! p3.getPlayerStateBehavior().getClass().equals(new LessThanMaxBetState().getClass()))
+      fail();
+
+    assertEquals(currentPot.get(game), 100);
+
+    assertEquals(p1.getChips(), 100);
+    assertEquals(p2.getChips(), 0);
+    assertEquals(p3.getChips(), 100);
+  }
 }

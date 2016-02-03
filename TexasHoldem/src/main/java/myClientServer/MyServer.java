@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import model.Game;
+import model.Player;
 
 public class MyServer {
 
@@ -59,7 +60,14 @@ public class MyServer {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}*/
-		Game game = new Game(server.users, 1000, 10, 20);
+    	ArrayList<Player> players = new ArrayList<Player>();
+    	for(RealUser user : server.users) {
+    	  players.add(new Player("test",user));
+    	}
+    	
+    	System.out.println(server.users);
+    	System.out.println(players);
+		Game game = new Game(players, 1000, 10, 20);
 		game.startGame();
 		//server.giveMessageToAllUsers(new Message("PoczatekGry"));
     }
