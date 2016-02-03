@@ -11,6 +11,7 @@ import myClientServer.MessageDecoratorAskPlayDecision;
 import myClientServer.MessageDecoratorAskPlayerBet;
 import myClientServer.MessageDecoratorSetBet;
 import myClientServer.MessageDecoratorSetCash;
+import myClientServer.MessageDecoratorSetCommonCards;
 import myClientServer.MessageInterface;
 import playerstate.AllInState;
 import playerstate.BigBlindState;
@@ -267,6 +268,9 @@ public class Game {
       } catch (NotPositiveAmountException e) {
         //Shouldn't be thrown. The method was called with an argument 2
       }
+      
+//      MessageInterface msg;
+//      msg = new MessageDecoratorSetCommonCards(commonCards.get(0), commonCards.get(1), commonCards.get(2), null, null, new Message());
       
       return this.findIndexOfStartingPlayer();
       
