@@ -473,7 +473,9 @@ public class Game {
         while ((! this.isOnlyOnePlayerNonFold()) && (roundNumber < 4)) {
 
           this.currentIndex = this.prepareRoundOfBetting(roundNumber);
-          while (true/*(! this.arePlayersReadyToNextRound())*/) {
+          
+          // ewentualnie trzeba zmienic waruenk petli na true. Ponizszy watunek moze wymagac poprawy
+          while ((! this.arePlayersReadyToNextRound()) && (! this.isOnlyOnePlayerNonFold())) {
             System.out.println("w licytacji");
             this.playerMove(players.get(this.currentIndex));
 
