@@ -280,6 +280,8 @@ public class Game {
       } catch (NotEnoughCardsException e) {
         e.printStackTrace();
       }
+//      MessageInterface msg;
+//    msg = new MessageDecoratorSetCommonCards(commonCards.get(0), commonCards.get(1), commonCards.get(2), null, null, new Message())
       return this.findIndexOfStartingPlayer();
     }
   }
