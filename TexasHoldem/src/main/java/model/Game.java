@@ -10,13 +10,10 @@ import myClientServer.MessageDecoratorAddPlayer;
 import myClientServer.MessageDecoratorAskPlayDecision;
 import myClientServer.MessageDecoratorAskPlayerBet;
 import myClientServer.MessageInterface;
-import myClientServer.RealUser;
 import playerstate.AllInState;
 import playerstate.BigBlindState;
 import playerstate.EqualToMaxBetState;
 import playerstate.FoldState;
-import playerstate.InitState;
-import playerstate.LessThanMaxBetState;
 import playerstate.PlayerState;
 import playerstate.PlayerStateBehavior;
 
@@ -186,6 +183,7 @@ public class Game {
       player.setPlayerStateBehavior(player.getPlayerStateBehavior().allin());
     } else {
       try {
+        System.out.println(player.getPlayerStateBehavior());
         player.setPlayerStateBehavior(player.getPlayerStateBehavior().bigBlind());
       } catch (InvalidMoveException e) {
         e.printStackTrace();
