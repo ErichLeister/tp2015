@@ -260,6 +260,9 @@ public class Game {
   private boolean arePlayersReadyToNextRound() {
     boolean areReady = true;
     
+    if (this.isOnlyOnePlayerNonFold())
+      return true;
+    
     Iterator<Player> iterator = players.iterator();
     
     while (iterator.hasNext() && (! areReady)) {
@@ -430,38 +433,33 @@ public class Game {
       }
     }
   }
-  
+
   public void startGame() {
     this.prepareGame();
-    
-    int roundNumber;
-    
+
+    int roundNumber = 0;
+
     MessageInterface message = new Message();
-    
+
     for(Player player : players){
       ClientPlayer clientPlayer = new ClientPlayer(player.getName(),player.getChips());
       message = new MessageDecoratorAddPlayer(clientPlayer, message);
+
+      while(true) {
+        roundNumber = 0;
+        while ((! this.isOnlyOnePlayerNonFold()) && (roundNumber < 4)) {
+
+          this.currentIndex = this.prepareRoundOfBetting(roundNumber);
+          while ((! this.arePlayersReadyToNextRound())) {
+            this.playerMove(players.get(this.currentIndex));
+
+            this.moveCurrentIndexToActivePlayer();
+          }
+          this.summaryOfBettingRound();
+          roundNumber++;
+        }
+        this.moveDealerButton();
+      }
     }
-    
-    for(Player player : players){
-      player.sendMessage(message);
-    }
-    
-    currentIndex = this.prepareRoundOfBetting(0);
-    
-//    while(true) {
-//      roundNumber = 0;
-//      while ((! this.isOnlyOnePlayerNonFold()) && (roundNumber < 4)) {
-//        currentIndex = this.prepareRoundOfBetting(roundNumber);
-//        while ((! this.isOnlyOnePlayerNonFold()) && (! this.arePlayersReadyToNextRound())) {
-//          this.playerMove(players.get(this.currentIndex));
-//          this.moveCurrentIndexToActivePlayer();
-//        }
-//        this.summaryOfBettingRound();
-//        roundNumber++;
-//      }
-//      
-//      this.moveDealerButton();
-//    }
   }
 }
