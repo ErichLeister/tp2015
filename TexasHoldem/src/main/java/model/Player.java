@@ -39,10 +39,6 @@ public class Player implements PlayerObserver, PlayerObservable {
     user.giveMessage(message);
   }
 
-  /*public Answer getAnswer() {
-    return user.getAnswer(10);
-  }*/
-
   public List<Card> getCards() {
 
     return this.cards;
@@ -123,45 +119,45 @@ public class Player implements PlayerObserver, PlayerObservable {
     bet = answer.getMessageInt();
     return bet;
   }
-  public int getPlayDecision(){
+  public String getPlayDecision(){
     Answer answer = user.getAnswer(0);
-    int intOption = -1;
+//    int intOption = -1;
     String stringOption = answer.getMessageString();
     stringOption.trim();
     stringOption.toLowerCase();
 
-    if(stringOption.equals("call"))
-    {
-      intOption = 1;
-    }
-    else if(stringOption.equals("raise"))
-    {
-      intOption = 2;
-    }
-    else if(stringOption.equals("allin"))
-    {
-      intOption = 3;
-    }
-    else if(stringOption.equals("all in"))
-    {
-      intOption = 3;
-    }
-    else if(stringOption.equals("all-in"))
-    {
-      intOption = 3;
-    }
-    else if(stringOption.equals("check"))
-    {
-      intOption = 4;
-    }
-    else if(stringOption.equals("bet"))
-    {
-      intOption = 5;
-    }
-    else if(stringOption.equals("fold"))
-    {
-      intOption = 6;
-    }
-    return intOption;
+//    if(stringOption.equals("call"))
+//    {
+//      intOption = 1;
+//    }
+//    else if(stringOption.equals("raise"))
+//    {
+//      intOption = 2;
+//    }
+//    else if(stringOption.equals("allin"))
+//    {
+//      intOption = 3;
+//    }
+//    else if(stringOption.equals("all in"))
+//    {
+//      intOption = 3;
+//    }
+//    else if(stringOption.equals("all-in"))
+//    {
+//      intOption = 3;
+//    }
+//    else if(stringOption.equals("check"))
+//    {
+//      intOption = 4;
+//    }
+//    else if(stringOption.equals("bet"))
+//    {
+//      intOption = 5;
+//    }
+//    else if(stringOption.equals("fold"))
+//    {
+//      intOption = 6;
+//    }
+    return stringOption;
   }
 }

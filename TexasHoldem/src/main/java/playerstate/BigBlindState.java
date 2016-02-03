@@ -11,7 +11,7 @@ public class BigBlindState implements PlayerStateBehavior {
 
   @Override
   public PlayerStateBehavior call() throws InvalidMoveException {
-    throw new InvalidMoveException();
+    return PlayerState.EQUAL_TO_MAX_BET.getStateBehavior();
   }
 
   @Override

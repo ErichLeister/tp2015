@@ -7,8 +7,9 @@ import exceptions.NotPositiveAmountException;
 import myClientServer.ClientPlayer;
 import myClientServer.Message;
 import myClientServer.MessageDecoratorAddPlayer;
+import myClientServer.MessageDecoratorAskPlayDecision;
+import myClientServer.MessageDecoratorAskPlayerBet;
 import myClientServer.MessageInterface;
-import myClientServer.PlayerServer;
 import myClientServer.RealUser;
 import playerstate.AllInState;
 import playerstate.BigBlindState;
@@ -17,6 +18,7 @@ import playerstate.FoldState;
 import playerstate.InitState;
 import playerstate.LessThanMaxBetState;
 import playerstate.PlayerState;
+import playerstate.PlayerStateBehavior;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +32,7 @@ public class Game {
   private List<Card> commonCards;
   private List<Player> players;
   private int pot;
+  private int currentPot;
   private int initialChipsPerPlayer;
   private Deck deck;
   private Player dealerButton;
@@ -37,25 +40,25 @@ public class Game {
   private int bigBlindAmount;
   private Map<Player, Integer> playerAllInBet;
   private int currentIndex;
+  private int []playersBet;
+  private int potInLastRounds;
+  private List<Player> currentAllInPlayers;
   
-  public Game(List<RealUser> users, int initialChipsPerPlayer, int smallBlindAmount, int bigBlindAmount) {
+  public Game(List<Player> players, int initialChipsPerPlayer, int smallBlindAmount, int bigBlindAmount) {
     this.commonCards = new ArrayList<Card>();
     this.initialChipsPerPlayer = initialChipsPerPlayer;
     this.deck = new Deck();
     this.dealerButton = null;
     this.pot = 0;
+    this.currentPot = 0;
     this.smallBlindAmount = smallBlindAmount;
     this.bigBlindAmount = bigBlindAmount;
-    playerAllInBet = new HashMap<Player, Integer>();
+    this.playerAllInBet = new HashMap<Player, Integer>();
     this.currentIndex = 0;
-    
-    players = new ArrayList<Player>();
-    
-    //System.out.println(users.size());
-    
-    for(RealUser user : users){
-      players.add(new Player("test",user));
-    }
+    this.players = players;
+    this.playersBet = new int[players.size()];
+    this.potInLastRounds = 0;
+    this.currentAllInPlayers = new ArrayList<Player>();
   }
   
   private void setDealerButton() {
@@ -138,6 +141,11 @@ public class Game {
       }
       player.setPlayerStateBehavior(PlayerState.INIT.getStateBehavior());
     }
+    
+    // clearing player's bet array with zeros
+    for(int i = 0 ; i < playersBet.length ; i++) {
+      playersBet[i] = 0;
+    }
   }
   
   private void takeSmallBlind() {
@@ -167,7 +175,7 @@ public class Game {
   private void takeBigBlind() {
     int index = this.findIndexOfBigBlind();
     Player player = players.get(index);
-    
+    System.out.println("player chips: " + player.getChips() + ", bigblindamount: " + this.bigBlindAmount);
     if (player.getChips() <= this.bigBlindAmount) {
       this.addPlayerAllInChips(player, 2 * player.getChips());
       if (player.getChips() > this.pot) {
@@ -192,6 +200,27 @@ public class Game {
     for (Player player : players) {
       player.setPlayerStateBehavior(PlayerState.INIT.getStateBehavior());
     }
+  }
+  
+  // groups all-ins, clear playersBet, currentPot, currentAllInPlayer etc.
+  private void summaryOfBettingRound() {
+    for (Player allInPlayer : this.currentAllInPlayers) {
+      int allInPlayerBet = playersBet[players.indexOf(allInPlayer)];
+      int sumBet = 0;
+      for (Player player : players) {
+        if (! allInPlayer.equals(player)) {
+          int playerBet = playersBet[players.indexOf(player)];
+          sumBet = (allInPlayerBet < playerBet ? allInPlayerBet : playerBet);
+        }
+      }
+      this.playerAllInBet.put(allInPlayer, sumBet);
+    }
+    for (int i = 0 ; i < this.playersBet.length ; i++) {
+      this.potInLastRounds +=playersBet[i];
+      playersBet[i] = 0;
+    }
+    this.currentPot = 0;
+    this.currentAllInPlayers = new ArrayList<Player>();
   }
   
   // Returns an index of a next player
@@ -235,9 +264,10 @@ public class Game {
     
     while (iterator.hasNext() && (! areReady)) {
       Player player = iterator.next();
-      if (player.getPlayerStateBehavior().equals(new FoldState())
-          || player.getPlayerStateBehavior().equals(new AllInState())
-          || player.getPlayerStateBehavior().equals(new EqualToMaxBetState()))
+      if (player.getPlayerStateBehavior().getClass().equals(new FoldState().getClass())
+          || player.getPlayerStateBehavior().getClass().equals(new AllInState().getClass())
+          || player.getPlayerStateBehavior().getClass().equals(new EqualToMaxBetState().getClass())
+          || player.getPlayerStateBehavior().getClass().equals(new BigBlindState().getClass()))
         areReady = false;
     }
     return areReady;
@@ -252,20 +282,6 @@ public class Game {
       }
     }
     return (activePlayers == 1);
-  }
-  
-  private boolean areFixedPlayerStates() {
-    boolean outcome = true;
-    
-    for (Player player : players) {
-      if (player.getPlayerStateBehavior().equals(new InitState())
-          || player.getPlayerStateBehavior().equals(new LessThanMaxBetState())
-          || player.getPlayerStateBehavior().equals(new BigBlindState())) {
-        outcome = true;
-        break;
-      }
-    }
-    return outcome;
   }
   
   private void summaryOfRound() throws NoPlayersException {
@@ -287,6 +303,134 @@ public class Game {
       }
   }
   
+  private boolean raiseMove(Player player) {
+    boolean isValidDecision = false;
+    
+    PlayerStateBehavior previousStateBehavior = player.getPlayerStateBehavior();
+    
+    try {
+      player.setPlayerStateBehavior(previousStateBehavior.raise());
+      
+      MessageInterface betRequest = new MessageDecoratorAskPlayerBet(new Message());
+      player.sendMessage(betRequest);
+      
+      int playerBet = this.currentPot + player.getBet();
+
+      if (playerBet >= player.getChips()) {
+        player.setPlayerStateBehavior(previousStateBehavior);
+        isValidDecision = false;
+      } else {
+        player.withdrawChips(player.getBet());
+        this.currentPot = playerBet;
+        this.playersBet[players.indexOf(player)] = playerBet; 
+        
+        isValidDecision = true;
+        
+        player.notifyObservers("rise");
+      }
+    } catch (InvalidMoveException e) {
+      player.setPlayerStateBehavior(previousStateBehavior);
+      isValidDecision = false;
+    }
+    return isValidDecision;
+  }
+  
+  private boolean callMove(Player player) {
+    boolean isValidDecision = false;
+    
+    PlayerStateBehavior previousStateBehavior = player.getPlayerStateBehavior();
+    
+    try {
+      player.setPlayerStateBehavior(previousStateBehavior.call());
+      
+      int playerBet = this.currentPot;
+
+      if (playerBet >= player.getChips()) {
+        player.setPlayerStateBehavior(previousStateBehavior);
+        isValidDecision = false;
+      } else {
+        player.withdrawChips(playerBet);
+        this.currentPot += playerBet;
+        this.playersBet[players.indexOf(player)] = playerBet; 
+        
+        isValidDecision = true;
+      }
+    } catch (InvalidMoveException e) {
+      player.setPlayerStateBehavior(previousStateBehavior);
+      isValidDecision = false;
+    }
+    return isValidDecision;
+  }
+  
+  private void foldMove(Player player) { 
+    player.setPlayerStateBehavior(player.getPlayerStateBehavior().fold());
+    this.potInLastRounds += this.playersBet[players.indexOf(player)];
+    this.playersBet[players.indexOf(player)] = 0;
+  }
+  
+  private boolean checkMove(Player player) {
+    boolean isValidDecision = false;
+
+    PlayerStateBehavior previousStateBehavior = player.getPlayerStateBehavior();
+
+    try {
+      player.setPlayerStateBehavior(previousStateBehavior.check());
+      isValidDecision = true;
+      
+    } catch (InvalidMoveException e) {
+      player.setPlayerStateBehavior(previousStateBehavior);
+      isValidDecision = false;
+    }
+    return isValidDecision;
+  }
+  
+  private void allInMove(Player player) {
+    player.setPlayerStateBehavior(player.getPlayerStateBehavior().allin());
+
+    int playerBet = player.getChips();
+
+    player.setChips(0);
+
+    this.playersBet[players.indexOf(player)] = playerBet; 
+
+    if (playerBet > this.currentPot) {
+      this.currentPot = playerBet;
+      player.notifyObservers("rise");
+    }
+    this.currentAllInPlayers.add(player);
+  }
+
+  private void playerMove(Player player) {
+    boolean isValidDecision = false;
+    while (! isValidDecision) {
+      MessageInterface moveRequest = new MessageDecoratorAskPlayDecision(new Message());
+      player.sendMessage(moveRequest);
+      String decision = player.getPlayDecision();
+
+      switch(decision) {
+      case "rise":
+        isValidDecision = raiseMove(player);
+        break;
+      case "call":
+        isValidDecision = callMove(player);
+        break;
+      case "fold":
+        foldMove(player);
+        isValidDecision = true;
+        break;
+      case "check":
+        isValidDecision = checkMove(player);
+        break;
+      case "allin":
+        allInMove(player);
+        isValidDecision = true;
+        break;
+        default:
+          isValidDecision = false;
+      }
+    }
+  }
+  
   public void startGame() {
     this.prepareGame();
     
@@ -303,18 +447,21 @@ public class Game {
       player.sendMessage(message);
     }
     
-    while(true) {
-      roundNumber = 0;
-      while ((! this.isOnlyOnePlayerNonFold()) && (roundNumber < 4)) {
-        
-        currentIndex = this.prepareRoundOfBetting(roundNumber);
-        while ((! this.isOnlyOnePlayerNonFold()) && (! areFixedPlayerStates())) {
-          
-        }
-        roundNumber++;
-      }
-      
-      this.moveDealerButton();
-    }
+    currentIndex = this.prepareRoundOfBetting(0);
+    
+//    while(true) {
+//      roundNumber = 0;
+//      while ((! this.isOnlyOnePlayerNonFold()) && (roundNumber < 4)) {
+//        currentIndex = this.prepareRoundOfBetting(roundNumber);
+//        while ((! this.isOnlyOnePlayerNonFold()) && (! this.arePlayersReadyToNextRound())) {
+//          this.playerMove(players.get(this.currentIndex));
+//          this.moveCurrentIndexToActivePlayer();
+//        }
+//        this.summaryOfBettingRound();
+//        roundNumber++;
+//      }
+//      
+//      this.moveDealerButton();
+//    }
   }
 }

@@ -149,8 +149,8 @@ public class Client {
     	//message = new MessageDecoratorSetBet(0,888,new Message());
     	//message.setClient(client);
     	//message.affectClient();
-    	client.draw();
-    	//client.connectToServer();
+    	//client.draw();
+    	client.connectToServer();
         /*client.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         client.frame.pack();
         client.frame.setVisible(true);*/

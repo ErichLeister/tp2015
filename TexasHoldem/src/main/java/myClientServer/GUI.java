@@ -258,7 +258,8 @@ public class GUI {
     c.gridy = 0;
     c.gridwidth = 2;
     c.fill = GridBagConstraints.BOTH;
-
+    playersA = new JPanel();
+    playersB = new JPanel();
     playersA.setLayout(new GridLayout(1,5));
     int k = situation.players.size();
     if (k > 5)

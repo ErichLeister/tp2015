@@ -22,7 +22,7 @@ public class GameSituation {
     cards.set(4, "2♠");
     cards.set(5, "2♠");
     cards.set(6, "2♠");*/
-		exampleSituation();
+		//exampleSituation();
 	}
 	public void setCard(int index, String card){
     cards.set(index, card);
