@@ -150,7 +150,7 @@ public class Client {
     	//message.setClient(client);
     	//message.affectClient();
     	client.draw();
-    	client.connectToServer();
+    	//client.connectToServer();
         /*client.frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         client.frame.pack();
         client.frame.setVisible(true);*/

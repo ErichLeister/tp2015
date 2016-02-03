@@ -5,14 +5,8 @@ import java.util.ArrayList;
 public class GameSituation {
 	ArrayList <ClientPlayer> players;
 	ArrayList <String> cards;
-	String commonCardA;
-	String commonCardB;
-	String commonCardC;
-	String commonCardD;
-	String commonCardE;
-	String cardA;
-	String cardB;
-	int yourCash;
+
+	int chipsOnTable;
 	
 	public GameSituation(){
 		players = new ArrayList<ClientPlayer>();
@@ -21,12 +15,26 @@ public class GameSituation {
 		for(a = 0; a<7; a++){
 			cards.add("");
 		}
-		cards.set(0, "A♠");
-		//exampleSituation();
+		/*cards.set(0, "A♠");
+		cards.set(1, "2♠");
+    cards.set(2, "2♠");
+    cards.set(3, "2♠");
+    cards.set(4, "2♠");
+    cards.set(5, "2♠");
+    cards.set(6, "2♠");*/
+		exampleSituation();
 	}
-	public void addPlayer(){
-		
+	public void setCard(int index, String card){
+    cards.set(index, card);
 	}
+	public void setChipsOnTable(int amountOfChips){
+	  this.chipsOnTable = amountOfChips;
+	}
+	 public int getChipsOnTable(){
+	    return chipsOnTable;
+	  }
+	//public void addPlayer(){	
+	//}
 	public void exampleSituation(){
 		players.add(new ClientPlayer("user1",100));
 		players.add(new ClientPlayer("user2",200));
